@@ -9,7 +9,6 @@ study/
 
 # Local tooling
 .venv/
-.claude/
 __pycache__/
 *.pyc
 .pytest_cache/
