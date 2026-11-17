@@ -207,6 +207,8 @@ It takes about 25 seconds and writes to `outputs/` (not committed), `reports/fig
 the results table in `reports/uat_report.md`. The tests on their own (no data needed):
 `.venv\Scripts\python.exe -m pytest tests`.
 
+To see one day's alert queue for the active rules (time, masked card, category, amount, rules fired, strongest action, fraud yes/no), run `.venv\Scripts\python.exe src/show_alerts.py --period test --date 2020-12-21 --top 20`.
+
 | Folder | Contents |
 |---|---|
 | `sql/` | load, DQ, EDA, macros, features and flags, R8, performance, metrics, profile, sweeps, risk list, PVT views |
