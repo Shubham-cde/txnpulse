@@ -9,6 +9,29 @@ Versioning:
   the rule version. For example, R1, R2 and R5 kept their versions when they were retired
   in set v2.
 
+## 2026-11-17: dashboard extracts and daily MIS (rule set v2.1, model v1 unchanged)
+
+- **`dashboards/build_extracts.py`:** Power BI star-schema extracts, rebuilt by
+  `run_all.py` and gitignored. Both periods, built with the same SQL and model as the
+  reports.
+  - `fact_alerts` (28,021 rows)
+  - `fact_daily_rule` (3,043 rows; active and shadow rules)
+  - `agg_hour_category` (504 rows, all transactions)
+  - `dim_rule`, `dim_date` (keyed by period and date, because 2020-06-21 is in both
+    periods), `dim_period`
+  - `expected_values.csv` with the check values
+- **`dashboards/dashboard_spec.md`:** a first-time Power BI build guide covering import and
+  data types, relationships, paste-ready DAX (alerts, cases, precision, FP ratio, recall,
+  value detection, per-day figures, budget, precision@K and value@K with a queue-size
+  parameter), four pages with every visual, and expected values.
+- **`mis/build_mis.py`:** a daily Excel MIS with COUNTIFS/SUMIFS formulas pointing at the
+  Raw sheet, Python check values next to them, breakdowns by rule, category and hour, the
+  top 20 by model score, and a pivot-ready Raw table. `run_all.py` builds the test example
+  for 2020-12-24 (21 alerts, 0 fraud).
+- **`tests/test_mis.py`:** 8 tests on sheet names, row counts, formulas, and a small
+  formula evaluator that recomputes every formula and compares it with the check values.
+- **Totals:** `run_all.py` now has 13 steps (about 2 minutes); 67 tests pass.
+
 ## 2026-11-17: ML phase additions (rule set unchanged, still v2.1)
 
 - **Value@K wording:** stated as the "share of fraud value in the alert queue" everywhere

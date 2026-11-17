@@ -219,7 +219,31 @@ Other parts of the phase:
 
 Report: [ml/model_report.md](ml/model_report.md).
 
-## 9. Limitations
+## 9. Dashboard extracts and daily MIS
+- **Power BI extracts:** `dashboards/build_extracts.py` writes a star schema to
+  `dashboards/extracts/` (rebuilt by `run_all.py`, not committed):
+  - `fact_alerts`: 28,021 alerts from the v2.1 active set, with model v1 score, daily rank,
+    reason codes and case ID
+  - `fact_daily_rule`: per date and rule
+  - `agg_hour_category`: over all transactions
+  - `dim_rule`, `dim_date`, `dim_period`
+- **Build guide:** [dashboards/dashboard_spec.md](dashboards/dashboard_spec.md) is a
+  step-by-step guide for Power BI Desktop: data types, relationships, paste-ready DAX, four
+  pages, and the values each page must show (for example, test precision 22.30% and 41.02
+  alerts per day).
+- **Daily Excel MIS:** `mis/build_mis.py --period test --date 2020-12-24` writes a workbook
+  with these sheets:
+  - **Summary:** COUNTIFS/SUMIFS formulas on the Raw sheet, each next to a Python-computed
+    check value and an OK/CHECK cell
+  - **By rule, By category, By hour:** formula breakdowns
+  - **Top 20:** the 20 highest model scores of the day
+  - **Raw:** a pivot-ready Excel table
+  - **Notes:** definitions
+
+  `run_all.py` builds the 2020-12-24 example into `outputs/mis/`. The tests recompute every
+  formula from the Raw sheet and compare it with the check values.
+
+## 10. Limitations
 - **Simulated data.** Fraud sits in narrow category, hour and amount bands, and its shape
   is the same in both periods. Precision here is higher than real card data would give.
   PVT tests stability under a lower fraud rate and higher volume, not new fraud patterns.
@@ -242,7 +266,7 @@ Report: [ml/model_report.md](ml/model_report.md).
   of the test results (such as R6 to shadow) has seen that period. Test figures for such a
   version are an impact estimate, not out-of-sample validation.
 
-## 10. How to reproduce
+## 11. How to reproduce
 1. Put the Kaggle files `fraudTrain.csv` and `fraudTest.csv` in `data/`.
 2. Run:
    ```
@@ -261,11 +285,14 @@ Report: [ml/model_report.md](ml/model_report.md).
 7. the ML alert ranker (validation inside train, test scored once)
 8. the threshold-gaming test
 9. ML charts
-10. the UAT report table
-11. pytest
+10. Power BI extracts
+11. the example Excel MIS (test, 2020-12-24)
+12. the UAT report table
+13. pytest
 
-It takes about a minute and writes to `outputs/` (not committed), `reports/figures/`,
-`ml/figures/` and the results table in `reports/uat_report.md`. The tests on their own (no data needed):
+It takes about two minutes and writes to `outputs/` (not committed, including
+`outputs/mis/`), `dashboards/extracts/` (not committed), `reports/figures/`, `ml/figures/`
+and the results table in `reports/uat_report.md`. The tests on their own (no data needed):
 `.venv\Scripts\python.exe -m pytest tests`.
 
 To see one day's alert queue for the active rules (time, masked card, category, amount, rules fired, strongest action, fraud yes/no), run `.venv\Scripts\python.exe src/show_alerts.py --period test --date 2020-12-21 --top 20`.
@@ -274,7 +301,9 @@ To see one day's alert queue for the active rules (time, masked card, category, 
 |---|---|
 | `sql/` | load, DQ, EDA, macros, features and flags, R8, performance, metrics, profile, sweeps, risk list, PVT views, ML features |
 | `src/` | pipeline scripts (`db.py` shared helpers, `run_rules.py`, `profile_data.py`, `build_risk_list.py`, `compare_pvt.py`, `make_figures.py`, `uat.py`, `run_uat.py`) |
-| `tests/` | `uat_cases.csv`, `test_rules.py`, `test_ml_features.py` (leakage tests for the ML features) |
+| `tests/` | `uat_cases.csv`, `test_rules.py`, `test_ml_features.py` (leakage tests for the ML features), `test_mis.py` (MIS sheets, row counts and formulas) |
+| `dashboards/` | Power BI extract builder and build guide (`dashboard_spec.md`) |
+| `mis/` | Daily Excel MIS builder |
 | `ml/` | ML alert ranker: features, training, ranking metrics, SHAP reason codes, gaming test, alert-note template, model report and figures |
 | `rules/risk_lists/` | versioned R8 merchant risk list |
 | `reports/` | data dictionary, rule register, UAT, tuning and PVT reports, figures, UAT evidence |
