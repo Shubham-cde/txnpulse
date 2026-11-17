@@ -2,11 +2,7 @@
 -- come from here, so fraudTest must never be read in this file.
 -- Expects table raw_train created by sql/00_load.sql.
 
-CREATE OR REPLACE MACRO haversine_km(lat1, lon1, lat2, lon2) AS
-    2 * 6371.0 * ASIN(SQRT(
-        POWER(SIN(RADIANS(lat2 - lat1) / 2), 2)
-        + COS(RADIANS(lat1)) * COS(RADIANS(lat2)) * POWER(SIN(RADIANS(lon2 - lon1) / 2), 2)
-    ));
+-- haversine_km comes from sql/05_macros.sql (loaded by src/db.py connect()).
 
 -- Bands are closed on the left: [lower, upper).
 CREATE OR REPLACE MACRO amount_band(a) AS
@@ -191,3 +187,46 @@ SELECT
 FROM eda_txn
 GROUP BY distance_band_start_km
 ORDER BY distance_band_start_km;
+
+-- name: r4_option_comparison
+-- Candidate R4 designs scored on exact amt > threshold (not bands).
+-- Option D is the chosen design: per-category thresholds, no upper cap.
+WITH options(option_id, category, min_amt_exclusive) AS (
+    VALUES
+        ('A: 3 cats > 500', 'shopping_net', 500), ('A: 3 cats > 500', 'misc_net', 500),
+        ('A: 3 cats > 500', 'shopping_pos', 500),
+        ('B: 3 cats > 750', 'shopping_net', 750), ('B: 3 cats > 750', 'misc_net', 750),
+        ('B: 3 cats > 750', 'shopping_pos', 750),
+        ('C: 4 cats > 300', 'shopping_net', 300), ('C: 4 cats > 300', 'misc_net', 300),
+        ('C: 4 cats > 300', 'shopping_pos', 300), ('C: 4 cats > 300', 'grocery_pos', 300),
+        ('D: 3 cats > 500, grocery_pos > 300', 'shopping_net', 500),
+        ('D: 3 cats > 500, grocery_pos > 300', 'misc_net', 500),
+        ('D: 3 cats > 500, grocery_pos > 300', 'shopping_pos', 500),
+        ('D: 3 cats > 500, grocery_pos > 300', 'grocery_pos', 300)
+),
+totals AS (
+    SELECT
+        SUM(is_fraud)                                   AS total_fraud_txns,
+        SUM(CASE WHEN is_fraud = 1 THEN amt ELSE 0 END) AS total_fraud_amt,
+        COUNT(DISTINCT CAST(ts AS DATE))                AS days
+    FROM eda_txn
+),
+hits AS (
+    SELECT o.option_id, e.is_fraud, e.amt
+    FROM eda_txn e
+    JOIN options o ON e.category = o.category AND e.amt > o.min_amt_exclusive
+)
+SELECT
+    h.option_id,
+    COUNT(*)                                                       AS alerts,
+    ROUND(COUNT(*) / ANY_VALUE(t.days), 1)                         AS alerts_per_day,
+    SUM(h.is_fraud)                                                AS fraud_alerts,
+    ROUND(100.0 * SUM(h.is_fraud) / COUNT(*), 1)                   AS precision_pct,
+    ROUND((COUNT(*) - SUM(h.is_fraud)) / SUM(h.is_fraud), 2)       AS fp_per_fraud,
+    ROUND(100.0 * SUM(h.is_fraud) / ANY_VALUE(t.total_fraud_txns), 1) AS txn_recall_pct,
+    ROUND(100.0 * SUM(CASE WHEN h.is_fraud = 1 THEN h.amt ELSE 0 END)
+        / ANY_VALUE(t.total_fraud_amt), 1)                         AS value_detection_pct
+FROM hits h
+CROSS JOIN totals t
+GROUP BY h.option_id
+ORDER BY h.option_id;

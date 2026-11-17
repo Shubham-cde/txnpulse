@@ -9,11 +9,17 @@ from db import OUTPUT_DIR, SQL_DIR, connect, has_statements, load_period, run_na
 
 FLAGS_SQL = SQL_DIR / "10_features_and_flags.sql"
 RESULT_SQL_FILES = [SQL_DIR / "20_rule_performance.sql", SQL_DIR / "30_metrics.sql"]
+# Threshold sweeps are only ever run on train, so nothing is tuned on test.
+TRAIN_ONLY_SQL_FILES = [SQL_DIR / "40_sweeps_train.sql"]
 
 
 def parse_args():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--period", choices=["train", "test"], required=True)
+    parser.add_argument(
+        "--review-cost", type=float, default=5.0,
+        help="assumed cost in USD to review one alert, used for net benefit",
+    )
     return parser.parse_args()
 
 
@@ -24,6 +30,7 @@ def is_written(sql_path):
 def main():
     args = parse_args()
     con = connect()
+    con.execute(f"SET VARIABLE review_cost = {args.review_cost}")
     load_period(con, args.period)
 
     counts = con.execute(
@@ -37,7 +44,8 @@ def main():
     run_sql_file(con, FLAGS_SQL)
 
     out_dir = OUTPUT_DIR / args.period
-    for sql_path in RESULT_SQL_FILES:
+    sql_files = RESULT_SQL_FILES + (TRAIN_ONLY_SQL_FILES if args.period == "train" else [])
+    for sql_path in sql_files:
         if not is_written(sql_path):
             print(f"skipped: {sql_path.name} not written yet")
             continue
