@@ -1,8 +1,39 @@
 # Changelog
 
-Rule versions follow `major.minor`:
-- **Minor:** a logic fix that does not change the business definition or thresholds.
-- **Major:** a threshold or definition change, or a status change such as retirement.
+Versioning:
+- **Rule version** (`major.minor`) tracks a rule's logic:
+  - **Minor:** a logic fix that does not change the business definition or thresholds.
+  - **Major:** a threshold or definition change.
+- **Rule set version** (`v1.1`, `v2`, `v2.1`, matching git tags `rules-*`) tracks the set
+  as deployed. A status change (active, shadow, retired) changes the rule set version, not
+  the rule version. For example, R1, R2 and R5 kept their versions when they were retired
+  in set v2.
+
+## 2026-11-17: documentation and governance (rule set unchanged, still v2)
+
+### Governance
+- `run_all.py` reproduces every output, chart and the UAT report table from the raw CSVs in
+  one command (about 25 seconds).
+- `.github/workflows/uat.yml` runs the test suite on every push and pull request. It needs
+  no Kaggle data.
+- `.github/pull_request_template.md` covers: rule, version change, business intent,
+  backtest before and after, PVT, UAT evidence, workload impact, rollback plan, and
+  maker/checker.
+- The rule register now carries owner, date, UAT IDs and train and test performance for
+  every rule.
+- The README tells the full story with real results and limitations.
+- Versioning clarified: a status change moves the rule set version, not the rule version.
+
+### Analysis (no rule change)
+- `r6_burn_in_check` (`sql/40`, train only) and `profile_first_visit_by_month` (`sql/35`)
+  show R6's train performance was partly a warm-up artifact.
+  - First visits fall from 94.16% of transactions in January 2019 to 7.17% in December
+    2020.
+  - R6's recall is 18.40% over all of train, but 9.54% over the last 3 months of train.
+  - Lesson: history-dependent rules need a burn-in period excluded from tuning.
+- **Holdout rule:** any version changed because of PVT findings reports its test figures as
+  an impact estimate, not out-of-sample validation.
+- **First change request drafted:** R6 to shadow (rule set v2 to v2.1). Not applied.
 
 ## 2026-11-17: post-deployment validation of rule set v2 (`rules-v2`)
 

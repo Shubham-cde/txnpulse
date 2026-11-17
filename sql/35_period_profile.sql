@@ -81,3 +81,19 @@ SELECT
                                                                       AS fraud_first_visit_pct,
     ROUND(MEDIAN(prior_txn_count), 0)                                 AS median_prior_txns
 FROM scored_flags;
+
+-- name: profile_first_visit_by_month
+-- First-visit share month by month: shows whether it falls steadily as cards
+-- build history, or only in the first months.
+SELECT
+    DATE_TRUNC('month', ts)::DATE                                                AS month,
+    COUNT(*)                                                                     AS txns,
+    ROUND(100.0 * COUNT(*) FILTER (WHERE first_visit) / COUNT(*), 2)             AS first_visit_pct,
+    ROUND(100.0 * COUNT(*) FILTER (WHERE first_visit AND is_fraud = 1) / NULLIF(SUM(is_fraud), 0), 2)
+                                                                                 AS fraud_first_visit_pct,
+    COUNT(*) FILTER (WHERE r6_new_merchant_high_amount)                          AS r6_alerts,
+    ROUND(100.0 * COUNT(*) FILTER (WHERE r6_new_merchant_high_amount AND is_fraud = 1)
+        / NULLIF(SUM(is_fraud), 0), 2)                                           AS r6_txn_recall_pct
+FROM scored_flags
+GROUP BY month
+ORDER BY month;

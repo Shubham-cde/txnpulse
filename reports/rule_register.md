@@ -59,6 +59,10 @@ recall and its train genuine alert rate (test fraud rate 0.386% against 0.579%).
 
 ## R1 Card velocity: retired
 - **Version:** 1.1 (status retired in rule set v2, 2026-11-17)
+- **Status / owner / date:** retired 2026-11-17 (rule set v2). Owner: project author (maker). Approved by: [TBD] (checker).
+- **UAT cases:** UAT-R1-01 to R1-08.
+- **Performance, train:** 1.11 alerts/day, 21.61% precision, 1.72% recall, 2.11% value detection.
+- **Performance, test (PVT):** 1.95 alerts/day, 7.41% precision, 1.31% recall, 1.75% value detection (monitoring only).
 - **Business intent:** catch rapid repeated use of a card, typical of card testing or a
   stolen card being drained.
 - **Logic:**
@@ -81,6 +85,10 @@ recall and its train genuine alert rate (test fraud rate 0.386% against 0.579%).
 
 ## R2 Amount spike: retired
 - **Version:** 1.0 (status retired in rule set v2)
+- **Status / owner / date:** retired 2026-11-17 (rule set v2). Owner: project author (maker). Approved by: [TBD] (checker).
+- **UAT cases:** UAT-R2-01 to R2-04.
+- **Performance, train:** 51.91 alerts/day, 9.36% precision, 34.75% recall, 55.73% value detection.
+- **Performance, test (PVT):** 58.11 alerts/day, 6.74% precision, 35.43% recall, 57.56% value detection (monitoring only).
 - **Business intent:** catch a transaction far larger than the card's normal spend.
 - **Logic:**
   ```
@@ -94,6 +102,10 @@ recall and its train genuine alert rate (test fraud rate 0.386% against 0.579%).
 
 ## R3 Late-night high value: active
 - **Version:** 2.0 (2026-11-17)
+- **Status / owner / date:** active since 2026-11-17 (rule set v2). Owner: project author (maker). Approved by: [TBD] (checker).
+- **UAT cases:** UAT-R3-01 to R3-08.
+- **Performance, train:** 8.78 alerts/day, 63.37% precision, 39.82% recall, 68.38% value detection.
+- **Performance, test (PVT):** 8.21 alerts/day, 53.77% precision (53.51% expected from base rate), 39.91% recall, 68.95% value detection.
 - **Business intent:** high-value spend at hours when the cardholder is usually inactive.
 - **Logic:**
   ```
@@ -113,6 +125,10 @@ recall and its train genuine alert rate (test fraud rate 0.386% against 0.579%).
 
 ## R4 Risky category + amount: active
 - **Version:** 2.0 (2026-11-17)
+- **Status / owner / date:** active since 2026-11-17 (rule set v2). Owner: project author (maker). Approved by: [TBD] (checker).
+- **UAT cases:** UAT-R4-01 to R4-08.
+- **Performance, train:** 20.76 alerts/day, 46.70% precision, 69.37% recall, 93.31% value detection.
+- **Performance, test (PVT):** 20.49 alerts/day, 36.83% precision (36.83% expected), 68.25% recall, 93.13% value detection.
 - **Business intent:** high-value spend in the categories where fraud concentrates.
 - **Logic:**
   ```
@@ -130,6 +146,10 @@ recall and its train genuine alert rate (test fraud rate 0.386% against 0.579%).
 
 ## R5 Distance anomaly: retired
 - **Version:** 1.0 (status retired in rule set v2)
+- **Status / owner / date:** retired 2026-11-17 (rule set v2). Owner: project author (maker). Approved by: [TBD] (checker).
+- **UAT cases:** UAT-R5-01 to R5-03.
+- **Performance, train:** 563.97 alerts/day, 0.58% precision, 23.27% recall, 23.60% value detection.
+- **Performance, test (PVT):** 669.22 alerts/day, 0.38% precision, 23.08% recall, 21.89% value detection (monitoring only).
 - **Business intent:** spend far from the cardholder's home location.
 - **Logic:**
   ```
@@ -143,6 +163,10 @@ recall and its train genuine alert rate (test fraud rate 0.386% against 0.579%).
 
 ## R6 New merchant + high amount: active
 - **Version:** 2.0 (2026-11-17)
+- **Status / owner / date:** active since 2026-11-17 (rule set v2); change request to shadow drafted (v2.1). Owner: project author (maker). Approved by: [TBD] (checker).
+- **UAT cases:** UAT-R6-01 to R6-05.
+- **Performance, train:** 6.09 alerts/day, 42.21% precision, 18.40% recall, 32.37% value detection; last 3 months of train only: 2.84 alerts/day, 9.54% recall (warm-up effect).
+- **Performance, test (PVT):** 2.10 alerts/day, 37.10% precision (32.71% expected), 7.04% recall, 12.70% value detection.
 - **Business intent:** a card with an established pattern suddenly spends a large amount at
   a merchant it has never used.
 - **Logic:**
@@ -173,6 +197,10 @@ recall and its train genuine alert rate (test fraud rate 0.386% against 0.579%).
 
 ## R7 Spend burst: active
 - **Version:** 2.0 (2026-11-17)
+- **Status / owner / date:** active since 2026-11-17 (rule set v2; watch genuine alert rate). Owner: project author (maker). Approved by: [TBD] (checker).
+- **UAT cases:** UAT-R7-01 to R7-10.
+- **Performance, train:** 23.60 alerts/day, 33.01% precision, 55.74% recall, 63.91% value detection.
+- **Performance, test (PVT):** 26.55 alerts/day, 23.18% precision (24.70% expected), 55.66% recall, 64.35% value detection.
 - **Business intent:** a card's spend over two days jumps far above its normal level,
   matching the multi-transaction spree pattern in the EDA.
 - **Logic:**
@@ -198,6 +226,10 @@ recall and its train genuine alert rate (test fraud rate 0.386% against 0.579%).
 
 ## R8 Risk-list hit: shadow
 - **Version:** 1.0 (2026-11-17), list v1
+- **Status / owner / date:** shadow since 2026-11-17 (rule set v2); not promoted after PVT. Owner: project author (maker). Approved by: [TBD] (checker).
+- **UAT cases:** UAT-R8-01 to R8-04.
+- **Performance, train:** not scored on train (list built from train labels; in-sample).
+- **Performance, test (PVT):** 31.66 alerts/day, 1.12% precision, 3.22% recall, 5.97% value detection, 0 unique fraud (shadow).
 - **Business intent:** stop or hold payments at merchants with a history of fraud.
 - **Logic:**
   ```

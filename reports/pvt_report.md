@@ -127,6 +127,34 @@ of history, so first visits are much rarer (`profile_first_visit.csv`):
 fraud lost; first-response share below 1%). It is not changed here, because PVT runs the
 frozen set unchanged.
 
+**Root cause: R6's train performance was partly a warm-up artifact.** The dataset starts
+every card with no history, so early in train almost every transaction is a first visit.
+In `profile_first_visit_by_month.csv` the first-visit share falls steadily:
+- 94.16% in January 2019
+- 12.57% in June 2020
+- 7.17% in December 2020
+
+R6's monthly recall falls with it, from 30.83% to 5 to 9%. The train-only check in
+`r6_burn_in_check.csv` (analysis only; the rule is not changed) shows the size of the
+effect:
+
+| Train segment | First-visit share | R6 alerts/day | R6 precision | R6 recall |
+|---|---|---|---|---|
+| All train (as tuned) | 36.95% | 6.09 | 42.21% | 18.40% |
+| First 3 months (warm-up) | 82.88% | 10.37 | 45.23% | 27.82% |
+| Train excluding first 3 months | 29.86% | 5.23 | 41.00% | 16.01% |
+| Last 3 months of train | 13.61% | 2.84 | 47.64% | 9.54% |
+| Test (PVT, for comparison) | 9.04% | 2.10 | 37.10% | 7.04% |
+
+- **What excluding the warm-up does:** excluding the first 3 months lowers R6's train
+  recall from 18.40% to 16.01%.
+- **The decay is longer than 3 months:** it continues for the whole training year. Only the
+  last months of train (9.54% recall) look like what R6 met on test.
+- **Lesson:** a history-dependent rule (new merchant, new device, first-time payee) needs a
+  burn-in period excluded from tuning. It should be judged on the most recent window,
+  where the history it depends on has stabilised. That is not a fixed 3 months; it depends
+  on how fast the underlying feature settles.
+
 This is partly how the simulator generates data (693 merchants that every card cycles
 through). In a real portfolio, new merchants keep appearing, so the decay would be slower.
 
@@ -178,7 +206,18 @@ These 16 cards first appear in the test period and all 16 have fraud
 | R2 | 6.74% | 35.43% | 17 unique fraud on test for 7,757 unique alerts; retirement confirmed |
 | R5 | 0.38% | 23.08% | Equal to the test base rate (0.386%); retirement confirmed |
 
-## 9. Limitations
+## 9. The test period as a holdout after this report
+This PVT is out-of-sample validation for rule set v2 (`rules-v2`), because v2 was frozen
+before the test period was run.
+
+The test period is **no longer an independent holdout** for any version changed because of
+these findings: R6 to shadow (proposed v2.1), or anything else prompted by sections 4 to 7.
+- **How to label those numbers:** any test-period figures reported for such a version are
+  an **impact estimate, not out-of-sample validation**.
+- **What real validation needs:** a later period that the change did not see. In this
+  project that would be new data, or monitoring after go-live.
+
+## 10. Limitations
 - **Simulated data.** The shape of fraud is identical in both periods, which a real
   portfolio would not show. This PVT tests stability under a lower fraud rate and higher
   volume, not under new fraud patterns.
@@ -190,9 +229,10 @@ These 16 cards first appear in the test period and all 16 have fraud
 - **Net benefit and the budget** keep the assumptions stated in the tuning report ($5 per
   alert; one analyst at about 9 minutes per alert).
 
-## 10. Actions
+## 11. Actions
 1. Keep R3, R4 and R7 active unchanged. Watch R7's genuine alert rate in monitoring.
 2. Raise a change request to move R6 to shadow at the next review (evidence in section 5).
+   Its test-period figures will be an impact estimate (section 9).
 3. Do not promote R8. Rebuild or drop the merchant list at the next review.
 4. Plan December peak staffing: about 1.3 analysts on alerts, or one analyst working cases.
 5. Add July-style recall dips to the monitoring checks in Phase 7.

@@ -286,3 +286,33 @@ SELECT * FROM sweep_metrics('sweep_r6') ORDER BY min_prior_txns, min_amt;
 
 -- name: r7_sweep
 SELECT * FROM sweep_metrics('sweep_r7') ORDER BY window_hours, multiple, min_spend, min_active_days;
+
+-- name: r6_burn_in_check
+-- Analysis only; R6 is not changed. Every card starts the dataset with no
+-- history, so first visits are common early in train. This compares R6 v2 on
+-- all of train, the first 3 months (warm-up), train without them, and the last
+-- 3 months of train (closest to the steady state the rule meets in production).
+WITH segments(segment, seg_start, seg_end) AS (
+    VALUES
+        ('1 all train',                    TIMESTAMP '2019-01-01', TIMESTAMP '2100-01-01'),
+        ('2 first 3 months (warm-up)',     TIMESTAMP '2019-01-01', TIMESTAMP '2019-04-01'),
+        ('3 train excluding first 3 months', TIMESTAMP '2019-04-01', TIMESTAMP '2100-01-01'),
+        ('4 last 3 months of train',       TIMESTAMP '2020-04-01', TIMESTAMP '2100-01-01')
+)
+SELECT
+    s.segment,
+    COUNT(DISTINCT CAST(f.ts AS DATE))                                          AS days,
+    ROUND(100.0 * COUNT(*) FILTER (WHERE f.first_visit) / COUNT(*), 2)          AS first_visit_pct,
+    ROUND(100.0 * COUNT(*) FILTER (WHERE f.first_visit AND f.is_fraud = 1)
+        / SUM(f.is_fraud), 2)                                                   AS fraud_first_visit_pct,
+    COUNT(*) FILTER (WHERE f.r6_new_merchant_high_amount)                       AS r6_alerts,
+    ROUND(COUNT(*) FILTER (WHERE f.r6_new_merchant_high_amount)
+        / COUNT(DISTINCT CAST(f.ts AS DATE)), 2)                                AS r6_alerts_per_day,
+    ROUND(100.0 * COUNT(*) FILTER (WHERE f.r6_new_merchant_high_amount AND f.is_fraud = 1)
+        / NULLIF(COUNT(*) FILTER (WHERE f.r6_new_merchant_high_amount), 0), 2)  AS r6_precision_pct,
+    ROUND(100.0 * COUNT(*) FILTER (WHERE f.r6_new_merchant_high_amount AND f.is_fraud = 1)
+        / SUM(f.is_fraud), 2)                                                   AS r6_txn_recall_pct
+FROM segments s
+JOIN scored_flags f ON f.ts >= s.seg_start AND f.ts < s.seg_end
+GROUP BY s.segment
+ORDER BY s.segment;

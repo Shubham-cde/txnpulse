@@ -1,0 +1,24 @@
+name: UAT
+
+# Runs the rule UAT suite on every push and pull request. The suite builds its
+# own transactions from tests/uat_cases.csv, so no Kaggle data is needed.
+on:
+  push:
+  pull_request:
+
+jobs:
+  uat:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run UAT and structural tests
+        run: python -m pytest tests -v
