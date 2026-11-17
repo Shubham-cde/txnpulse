@@ -26,6 +26,7 @@ def connect(database=":memory:"):
     # Timestamps in the data are naive local times; pinning UTC stops DuckDB
     # from shifting epoch conversions into the machine's own time zone.
     con.execute("SET TimeZone = 'UTC'")
+    con.execute("SET enable_progress_bar = false")
     run_sql_file(con, SQL_DIR / "05_macros.sql")
     return con
 
