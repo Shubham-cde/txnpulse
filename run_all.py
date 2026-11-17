@@ -18,6 +18,9 @@ STEPS = [
     ("frozen rules on test (PVT)", ["src/run_rules.py", "--period", "test"]),
     ("train vs test comparison", ["src/compare_pvt.py"]),
     ("charts", ["src/make_figures.py"]),
+    ("ML alert ranker (validation inside train, test scored once)", ["ml/train_ranker.py"]),
+    ("threshold-gaming test", ["ml/gaming_test.py"]),
+    ("ML charts", ["ml/make_ml_figures.py"]),
     ("UAT cases and report table", ["src/run_uat.py"]),
     ("pytest suite", ["-m", "pytest", "tests", "-q"]),
 ]
@@ -37,7 +40,7 @@ def main():
         result = subprocess.run([sys.executable, *args], cwd=REPO_ROOT)
         if result.returncode != 0:
             sys.exit(f"step failed: {label}")
-    print(f"done in {time.perf_counter() - started:.0f} s; results in outputs/, reports/figures/ and reports/uat_report.md")
+    print(f"done in {time.perf_counter() - started:.0f} s; results in outputs/, reports/figures/, ml/figures/ and reports/uat_report.md")
 
 
 if __name__ == "__main__":

@@ -177,7 +177,49 @@ was decided after seeing the test period.
 
 ![Train vs test, rule set v2](reports/figures/pvt_train_vs_test_v2.png)
 
-## 8. Limitations
+## 8. ML alert prioritisation
+The rules decide what is alerted. A gradient-boosting model (scikit-learn
+HistGradientBoostingClassifier) decides the order in which each day's alerts are reviewed.
+
+- **Training data:** train-period alerts from the active v2.1 rules (20,063 alerts).
+- **Features:** past-only, with no R8 (its list was built from train labels) and no labels.
+- **Model choice:** settings and training window were chosen on a time-based validation
+  split inside train. The test period was scored once at the end.
+
+Results on the test period, from daily queues. Value@K is the **share of fraud value in the
+alert queue**: fraud amount in the reviewed alerts, divided by the fraud amount of all alerts
+($1,104,004.34). It is not a share of all fraud.
+
+| Ranking | PR-AUC | Precision@10 / day | Value@10 / day | Value@20 / day |
+|---|---|---|---|---|
+| Model score | 0.9768 | 65.57% | 73.14% | 94.54% |
+| Rules fired | 0.5210 | 45.57% | 70.08% | 90.02% |
+| Strongest action | 0.3288 | 37.99% | 60.41% | 85.13% |
+| Amount | 0.2599 | 25.05% | 43.07% | 82.01% |
+
+- **As a share of ALL test fraud value** ($1,133,324.68, alerted or not), the model's
+  value@10 and value@20 are 71.25% and 92.09%, against 68.27% and 87.69% for rules fired.
+- **At case level** (alerts on a card within 24 hours count once, ranked by the opening
+  alert), the model's top 10 cases per day cover 99.03% of the fraud value in the alert
+  queue (96.47% of all fraud value), against 63.49% for rules fired.
+- **A monotonic-constrained candidate was tried and not adopted.** It forces the score to
+  rise with amount, which fixes a $1,320 fraud the model scored near zero. It lost on the
+  validation split (PR-AUC 0.9512 against 0.9840) and does not help against threshold
+  gaming.
+- **Operating model:** the ranker orders the queue but never suppresses an alert.
+  HOLD_CONFIRM alerts are always worked regardless of score, and a daily random sample of
+  low-scored alerts is reviewed.
+
+Other parts of the phase:
+- **SHAP reason codes** for every alert.
+- **An alert-note prompt template** (no API calls).
+- **A threshold-gaming test.** Fraud placed just under thresholds is often still caught by
+  R7, but the model ranks it low, because it learned the simulator's fraud bands. That is a
+  documented limitation.
+
+Report: [ml/model_report.md](ml/model_report.md).
+
+## 9. Limitations
 - **Simulated data.** Fraud sits in narrow category, hour and amount bands, and its shape
   is the same in both periods. Precision here is higher than real card data would give.
   PVT tests stability under a lower fraud rate and higher volume, not new fraud patterns.
@@ -193,11 +235,14 @@ was decided after seeing the test period.
 - **R8 matches merchants by exact name;** a production list would key on a merchant ID.
 - **trans_num is a random ID,** so the order of same-second transactions is deterministic
   but not real arrival order.
+- **The ML ranker is fitted to simulator patterns:** its PR-AUC (0.98) is far above what
+  real data would allow, and it ranks fraud outside the simulator's bands low. See the
+  model report.
 - **The test period can no longer validate later changes.** Any rule change made because
   of the test results (such as R6 to shadow) has seen that period. Test figures for such a
   version are an impact estimate, not out-of-sample validation.
 
-## 9. How to reproduce
+## 10. How to reproduce
 1. Put the Kaggle files `fraudTrain.csv` and `fraudTest.csv` in `data/`.
 2. Run:
    ```
@@ -213,20 +258,24 @@ was decided after seeing the test period.
 4. frozen rules on test
 5. the train-vs-test comparison
 6. charts
-7. the UAT report table
-8. pytest
+7. the ML alert ranker (validation inside train, test scored once)
+8. the threshold-gaming test
+9. ML charts
+10. the UAT report table
+11. pytest
 
-It takes about 25 seconds and writes to `outputs/` (not committed), `reports/figures/` and
-the results table in `reports/uat_report.md`. The tests on their own (no data needed):
+It takes about a minute and writes to `outputs/` (not committed), `reports/figures/`,
+`ml/figures/` and the results table in `reports/uat_report.md`. The tests on their own (no data needed):
 `.venv\Scripts\python.exe -m pytest tests`.
 
 To see one day's alert queue for the active rules (time, masked card, category, amount, rules fired, strongest action, fraud yes/no), run `.venv\Scripts\python.exe src/show_alerts.py --period test --date 2020-12-21 --top 20`.
 
 | Folder | Contents |
 |---|---|
-| `sql/` | load, DQ, EDA, macros, features and flags, R8, performance, metrics, profile, sweeps, risk list, PVT views |
+| `sql/` | load, DQ, EDA, macros, features and flags, R8, performance, metrics, profile, sweeps, risk list, PVT views, ML features |
 | `src/` | pipeline scripts (`db.py` shared helpers, `run_rules.py`, `profile_data.py`, `build_risk_list.py`, `compare_pvt.py`, `make_figures.py`, `uat.py`, `run_uat.py`) |
-| `tests/` | `uat_cases.csv`, `test_rules.py` |
+| `tests/` | `uat_cases.csv`, `test_rules.py`, `test_ml_features.py` (leakage tests for the ML features) |
+| `ml/` | ML alert ranker: features, training, ranking metrics, SHAP reason codes, gaming test, alert-note template, model report and figures |
 | `rules/risk_lists/` | versioned R8 merchant risk list |
 | `reports/` | data dictionary, rule register, UAT, tuning and PVT reports, figures, UAT evidence |
 | `.github/` | CI workflow and pull request template for rule changes |

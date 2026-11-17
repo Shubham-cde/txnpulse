@@ -9,6 +9,62 @@ Versioning:
   the rule version. For example, R1, R2 and R5 kept their versions when they were retired
   in set v2.
 
+## 2026-11-17: ML phase additions (rule set unchanged, still v2.1)
+
+- **Value@K wording:** stated as the "share of fraud value in the alert queue" everywhere
+  (report, README, chart labels). Every value@K figure is now also given as a share of ALL
+  test fraud value.
+  - At alert level, the model's value@10 and value@20 are 71.25% and 92.09% of all fraud,
+    against 73.14% and 94.54% of the queue.
+- **Monotonic constraint experiment:** a gradient-boosting candidate with `monotonic_cst`,
+  non-decreasing in amt, amt_to_avg30 and spend_24h, with the same grid and validation
+  split.
+  - **Decision on validation (train only):** v1 kept as the documented model (validation
+    PR-AUC 0.9840 against 0.9512). Recorded in `outputs/ml/model_decision.json`.
+  - **Candidate test figures, labelled "impact estimate, not out-of-sample validation":**
+    PR-AUC 0.9329, precision@10 63.40%.
+  - **The $1,320 fraud:** rank 8 of 14 under v1, 5 of 14 under the candidate.
+  - **Gaming test:** the constraint doesn't lift fraud kept under the thresholds.
+- **Operating model** added to `ml/model_report.md`:
+  - the model orders the queue and never suppresses alerts
+  - HOLD_CONFIRM alerts are always worked
+  - a daily random sample of low-scored alerts is reviewed
+- **Outputs renamed:** `test_rankings_v1.csv`, `test_rankings_monotonic.csv`,
+  `validation_rankings_*.csv`, `model_v1.pkl`, `model_monotonic.pkl`,
+  `test_scores_by_model.csv`. `ml/gaming_test.py` scores both models.
+
+## 2026-11-17: ML alert prioritisation (rule set unchanged, still v2.1)
+
+No rule changed. The model only orders the alerts the active rules raise.
+
+### Added
+- **Features:** `sql/60_ml_alert_features.sql` and `ml/features.py` build past-only
+  features for alerted transactions.
+  - R8 is excluded (risk list built from train labels).
+  - There are no past-label features, and IDs and personal data are excluded.
+- **`ml/train_ranker.py`:**
+  - validation split inside train (from 2020-04-01)
+  - warm-up check (all of train against 2019-07 onwards)
+  - logistic regression baseline against HistGradientBoostingClassifier with class weights
+  - test scored once
+- **Chosen model:** gradient boosting on all of train (validation PR-AUC 0.9840).
+- **Test results:**
+  - PR-AUC 0.9768 against 0.5210 for ranking by rules fired.
+  - At 10 alerts per day per analyst queue: precision 65.57% against 45.57%; share of fraud
+    value in the alert queue 73.14% against 70.08%.
+  - At case level: value@10 (queue) 99.03% against 63.49%.
+- **`ml/ranking.py`:** precision@K, value@K and PR-AUC for four ranking methods, at alert and
+  case level.
+- **`ml/explain.py`:** SHAP top-3 reason codes. **`ml/alert_note.py`:** prompt template only,
+  no API call.
+- **`ml/gaming_test.py`:** synthetic fraud just under each threshold. R7 catches most
+  attempts, S3 and S4 evade the active rules, and the model ranks gamed fraud low.
+- **`ml/make_ml_figures.py`** and `ml/model_report.md`.
+- **`tests/test_ml_features.py`:** 6 leakage tests (no R8, no labels, no future data, fixed
+  category columns). The future-data test was checked against a deliberately leaky feature.
+- **Pipeline:** `run_all.py` runs the ML steps (11 steps, about a minute).
+  `src/db.py` turns off the DuckDB progress bar.
+
 ## 2026-11-17: rule set v2.1 (R6 to shadow)
 
 The first change through the pull request process. The PR description is kept with the
