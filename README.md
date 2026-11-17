@@ -1,6 +1,6 @@
 # TxnPulse — Transaction-Monitoring Rules System
 
-Status: work in progress (Phase 1, rule writing). The full write-up comes in Phase 4.
+Status: work in progress (Phase 2, rule testing, done). The full write-up comes in Phase 4.
 
 TxnPulse runs on simulated card data and covers the work of a bank's fraud rules team:
 - write transaction-monitoring rules in SQL
@@ -42,6 +42,20 @@ Notes on the starting values:
   Median loss before the first alert is 0 fraud transactions and $0; P90 is 1 transaction
   and $128.85 (`card_detection.csv`, `loss_before_first_alert.csv`).
 
+## Rule testing (UAT)
+
+`tests/uat_cases.csv` holds 42 hand-written scenarios (212 transactions) covering:
+- thresholds below, at and above the limit
+- window edges and midnight wrap
+- duplicate timestamps
+- cards with no history
+
+Each case runs `sql/10` unchanged on its own rows. The suite needs no Kaggle data.
+
+Two defects were found and fixed: the R1 and R7 windows counted same-second transactions
+that come after the current one. After the fix, all 42 cases pass. Details and known gaps
+are in [reports/uat_report.md](reports/uat_report.md).
+
 ## Reproduce (so far)
 
 ```
@@ -49,6 +63,8 @@ py -3.12 -m venv .venv
 .venv\Scripts\python.exe -m pip install -r requirements.txt
 .venv\Scripts\python.exe src/profile_data.py
 .venv\Scripts\python.exe src/run_rules.py --period train
+.venv\Scripts\python.exe -m pytest tests
+.venv\Scripts\python.exe src/run_uat.py
 ```
 
 The Kaggle files `fraudTrain.csv` and `fraudTest.csv` go in `data/`.
