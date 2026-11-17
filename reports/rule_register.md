@@ -4,7 +4,9 @@ This is the current state of every rule. It is updated with each version change;
 is in [CHANGELOG.md](../CHANGELOG.md).
 - **Train figures:** from the training period (2019-01-01 to 2020-06-21, 537 days, 7,506
   fraud transactions), in `outputs/train/`.
-- **Test figures:** added after post-deployment validation (PVT).
+- **Test figures:** from post-deployment validation (PVT) on the test period
+  (2020-06-21 to 2020-12-31, 194 days, 2,145 fraud), frozen set `rules-v2`; see
+  [pvt_report.md](pvt_report.md).
 - **Tuning evidence:** in [tuning_report.md](tuning_report.md).
 - **Owner:** the project author. Approval: [TBD] (maker/checker sign-off in Phase 4).
 
@@ -40,6 +42,20 @@ v1.0/v1.1, before tuning) can be reproduced from git tag `rules-v1.1`.
   rule, fraud it would add if reinstated.
 - **Retired rules** are still computed at their last version so their volume can be
   monitored. They do not alert.
+
+## Summary (test, PVT)
+
+| ID | Status | Alerts/day | Precision (expected from base rate) | Txn recall | Value detection | PVT result |
+|---|---|---|---|---|---|---|
+| R3 | Active | 8.21 | 53.77% (53.51%) | 39.91% | 68.95% | Pass |
+| R4 | Active | 20.49 | 36.83% (36.83%) | 68.25% | 93.13% | Pass |
+| R6 | Active | 2.10 | 37.10% (32.71%) | 7.04% | 12.70% | Fail on purpose: sets first response for 0 of 215 cards; shadow recommended |
+| R7 | Active | 26.55 | 23.18% (24.70%) | 55.66% | 64.35% | Pass, watch genuine alert rate |
+| R8 | Shadow | 31.66 | 1.12% | 3.22% | 5.97% | Do not promote |
+| Active set | | 41.20 (18.78 cases) | 22.21% (23.35%) | 82.75% | 97.41% | Pass |
+
+"Expected from base rate" is the precision the rule would show on test if it kept its train
+recall and its train genuine alert rate (test fraud rate 0.386% against 0.579%).
 
 ## R1 Card velocity: retired
 - **Version:** 1.1 (status retired in rule set v2, 2026-11-17)
@@ -143,9 +159,11 @@ v1.0/v1.1, before tuning) can be reproduced from git tag `rules-v1.1`.
 - **Status decision (approved rule):** shadow if it loses 0 fraud AND is the first alert for
   fewer than 1% of detected cards; otherwise active.
   - Removing it saves 237 alerts and loses 0 fraud ($0).
-  - It fires on the first alerted fraud for 129 of 755 detected cards (17.09%), and sets the
-    first response for 28 (3.71%). Above 1%, so it stays **active**.
-  - Under the stricter reading "only rule on the first alert" it would be 0% and shadow.
+  - Its own contribution: on 28 of 755 detected cards (3.71%) it sets a stronger first
+    response, STEP_UP instead of ALERT. Above 1%, so it stays **active**.
+  - It also fires on the first alerted fraud for 129 cards (17.09%), but that is co-firing:
+    another active rule fired on the same transaction every time. It is not counted as
+    R6's contribution.
   - It is the first candidate for shadow at the next review.
 - **Fields:** card_id, merchant, ts, trans_num, amt.
 - **Known gap:** a card's first-ever transaction can't fire (UAT-R6-05).

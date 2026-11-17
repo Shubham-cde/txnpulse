@@ -209,12 +209,61 @@ def monthly_budget(period, title, filename):
     save(fig, filename)
 
 
+PVT_RULE_LABELS = {
+    "r3_late_night_high_value": "R3",
+    "r4_risky_category_amount": "R4",
+    "r6_new_merchant_high_amount": "R6",
+    "r7_spend_burst": "R7",
+    "any_active": "Active set",
+}
+
+
+def pvt_rule_comparison():
+    comparison = pd.read_csv(OUTPUT_DIR / "pvt" / "pvt_rule_comparison.csv")
+    comparison = comparison[comparison["rule"].isin(PVT_RULE_LABELS)].copy()
+    comparison["label"] = comparison["rule"].map(PVT_RULE_LABELS)
+    comparison = comparison.set_index("label").loc[list(PVT_RULE_LABELS.values())[::-1]].reset_index()
+    panels = [
+        ("precision_pct", "Precision (%)", True),
+        ("txn_recall_pct", "Transaction recall (%)", False),
+        ("value_detection_pct", "Value detection (%)", False),
+    ]
+    fig, axes = plt.subplots(1, 3, figsize=(12, 3.6), sharey=True)
+    for ax, (metric, title, show_expected) in zip(axes, panels):
+        for y, row in comparison.iterrows():
+            train_value, test_value = row[f"{metric}_train"], row[f"{metric}_test"]
+            ax.plot([train_value, test_value], [y, y], color=GRID, linewidth=2, zorder=1)
+            ax.scatter(train_value, y, s=55, color=OTHER_POINT, zorder=3, edgecolors=SURFACE, linewidths=2,
+                       label="train" if y == 0 else None)
+            ax.scatter(test_value, y, s=55, color=V2_BLUE, zorder=4, edgecolors=SURFACE, linewidths=2,
+                       label="test" if y == 0 else None)
+            if show_expected:
+                ax.scatter(row["expected_test_precision_pct"], y, s=70, facecolors="none", edgecolors=TEXT,
+                           linewidths=1.2, zorder=5, label="test expected from base rate" if y == 0 else None)
+        ax.set_yticks(range(len(comparison)), comparison["label"])
+        ax.set_title(title, loc="left")
+        ax.grid(axis="y", visible=False)
+    handles, labels = [], []
+    for ax in axes:
+        for h, l in zip(*ax.get_legend_handles_labels()):
+            if l not in labels:
+                handles.append(h)
+                labels.append(l)
+    fig.legend(handles, labels, loc="upper right", ncol=3)
+    fig.suptitle("Frozen v2 rules: train vs test", x=0.01, ha="left", color=TEXT, fontsize=12)
+    fig.tight_layout(rect=(0, 0, 1, 0.9))
+    save(fig, "pvt_train_vs_test.png")
+
+
 def main():
     tuning_tradeoffs()
     r4_by_category()
     r5_precision()
     candidate_sets()
     monthly_budget("train", "v2 active rule set on train: alerts and cases per day by month", "tuning_monthly_alerts_train.png")
+    if (OUTPUT_DIR / "pvt" / "pvt_rule_comparison.csv").exists():
+        pvt_rule_comparison()
+        monthly_budget("test", "Frozen v2 on test: alerts and cases per day by month", "pvt_monthly_alerts_test.png")
 
 
 if __name__ == "__main__":

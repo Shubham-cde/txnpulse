@@ -164,14 +164,16 @@ From `r6_sweep.csv`:
   first alert for fewer than 1% of detected cards; otherwise keep it active.
   - **Leave-one-out** (`unique_catches.csv`): removing R6 saves 237 alerts (0.44 per day)
     and loses 0 fraud and $0 of value. The first condition holds.
-  - **First alert** (`first_alert_view.csv`): R6 fires on the first alerted fraud
-    transaction for 129 of 755 detected cards (17.09%). It sets the customer's first
-    response (STEP_UP instead of ALERT) for 28 of them (3.71%). Both are above 1%, so the
+  - **First alert** (`first_alert_view.csv`): R6's own contribution is the 28 of 755
+    detected cards (3.71%) where it sets a stronger first response, STEP_UP instead of
+    ALERT. On those cards no HOLD_CONFIRM rule fired on the first alerted fraud, so without
+    R6 the first response would have been a post-event review. 3.71% is above 1%, so the
     second condition fails.
-  - **Applied: R6 stays active.**
-  - **Under a stricter reading** ("the only rule firing on the first alert") the share
-    would be 0 cards (0%) and R6 would go to shadow. This is recorded so the reading can be
-    revisited.
+  - **Applied: R6 stays active,** on the basis of those 28 cards.
+  - **What is not evidence:** R6 also fires on the first alerted fraud for 129 cards
+    (17.09%), but that is co-firing. On every one of those cards another active rule fired
+    on the same transaction (R6 is never the only rule, 0 cards). On the other 101, R3 or R7
+    already set HOLD_CONFIRM, so R6 changes nothing there.
   - Across all alerts, R6 sets the action on 936 alerts (52 fraud, $47,138.14) that would
     otherwise be a post-event ALERT (`action_mix.csv`). It remains the first candidate for
     shadow or retirement at the next review.

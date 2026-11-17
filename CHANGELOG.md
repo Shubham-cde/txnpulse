@@ -4,6 +4,23 @@ Rule versions follow `major.minor`:
 - **Minor:** a logic fix that does not change the business definition or thresholds.
 - **Major:** a threshold or definition change, or a status change such as retirement.
 
+## 2026-11-17: post-deployment validation of rule set v2 (`rules-v2`)
+
+No rule or threshold changed. Results are in `reports/pvt_report.md`.
+- **Active set on test:** 41.20 alerts and 18.78 cases per day, precision 22.21% (23.35%
+  expected from the lower base rate), recall 82.75%, value detection 97.41%, 215 of 218
+  cards detected.
+- **R3, R4 and R7 pass.**
+- **R6:** recall fell from 18.40% to 7.04% as cards built up history, and it set the first
+  response for 0 cards. Shadow recommended at the next review.
+- **R8 (shadow):** 1.12% precision with no unique catches. Not promoted.
+- **Added** `sql/35_period_profile.sql` (both periods), `sql/50_pvt_test.sql` (test only)
+  and `src/compare_pvt.py`. The `amount_band` macro moved to `sql/05_macros.sql`.
+
+### Documentation
+- R6's justification is now based only on the 28 cards (3.71%) where it sets a stronger
+  first response. The 17.09% "fired on the first alert" figure is presented as co-firing.
+
 ## 2026-11-17: rule set v2 (approved and frozen)
 
 All changes are based on train only. Evidence is in `reports/tuning_report.md`.
@@ -15,9 +32,10 @@ reproduced from git tag `rules-v1.1`.
 Approved decisions:
 - **R3 at $600:** $500 would add 1.71 alerts per day for +0.36 points of recall, about 2.9%
   precision on the extra alerts.
-- **R6 active:** under the approved test it loses 0 fraud if removed, but it is on the
-  first alert for 17.09% of detected cards (3.71% where it sets the action), above the 1%
-  bar.
+- **R6 active:** under the approved test it loses 0 fraud if removed, but it sets a
+  stronger first response (STEP_UP instead of ALERT) for 28 of 755 detected cards (3.71%),
+  above the 1% bar. Its 17.09% "fired on the first alert" figure is co-firing with other
+  rules and is not counted as its own contribution.
 - **Alert budget:** 50 per day, assumed (one analyst, about 9 minutes per alert). December
   2019 (74.32 alerts, 32.42 cases per day) is a peak-staffing finding, not a threshold
   change.

@@ -12,9 +12,14 @@ from db import (
 FLAGS_SQL = SQL_DIR / "10_features_and_flags.sql"
 # R8's list is built from train labels, so R8 is only ever scored on test.
 TEST_ONLY_FLAGS_SQL = SQL_DIR / "15_r8_risk_list.sql"
-RESULT_SQL_FILES = [SQL_DIR / "20_rule_performance.sql", SQL_DIR / "30_metrics.sql"]
+RESULT_SQL_FILES = [
+    SQL_DIR / "20_rule_performance.sql",
+    SQL_DIR / "30_metrics.sql",
+    SQL_DIR / "35_period_profile.sql",
+]
 # Threshold sweeps are only ever run on train, so nothing is tuned on test.
 TRAIN_ONLY_SQL_FILES = [SQL_DIR / "40_sweeps_train.sql"]
+TEST_ONLY_SQL_FILES = [SQL_DIR / "50_pvt_test.sql"]
 
 
 def parse_args():
@@ -52,7 +57,7 @@ def main():
         run_named_queries(con, TEST_ONLY_FLAGS_SQL, out_dir, {"risk_list_csv": RISK_LIST_CSV.as_posix()})
         print(f"{TEST_ONLY_FLAGS_SQL.name}: R8 added from {RISK_LIST_CSV.name}")
 
-    sql_files = RESULT_SQL_FILES + (TRAIN_ONLY_SQL_FILES if args.period == "train" else [])
+    sql_files = RESULT_SQL_FILES + (TRAIN_ONLY_SQL_FILES if args.period == "train" else TEST_ONLY_SQL_FILES)
     for sql_path in sql_files:
         if not is_written(sql_path):
             print(f"skipped: {sql_path.name} not written yet")
