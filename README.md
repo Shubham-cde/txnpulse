@@ -10,7 +10,9 @@ TxnPulse runs on simulated card data and covers the work of a bank's fraud rules
 It is a rules-first project: every alert comes from a readable IF-ELSE rule with a version,
 an owner, a test suite and a documented reason for its threshold.
 
-Rule set v2 is frozen at git tag `rules-v2`. The previous set is at `rules-v1.1`.
+The current rule set is v2.1: rule set v2 with R6 moved to shadow after validation. Rule
+set v2 is frozen at git tag `rules-v2` and is the version validated on the test period. The
+pre-tuning set is at `rules-v1.1`.
 
 ## 1. Problem
 A fraud operations team can only review a limited number of alerts a day. Rules that catch
@@ -54,14 +56,14 @@ All rules read one table, `txn`, and write one boolean column each to `flags`
 - Baselines exclude the current transaction (R2) or the current day (R7).
 - Same-second transactions are taken in `(ts, trans_num)` order.
 
-| ID | Version | Status | Logic (v2) | Action |
+| ID | Version | Status (set v2.1) | Logic | Action |
 |---|---|---|---|---|
 | R1 | 1.1 | Retired | 5 or more transactions on the card in 60 minutes | ALERT |
 | R2 | 1.0 | Retired | amt > 5 x average of the previous 30 transactions | STEP_UP |
 | R3 | 2.0 | Active | Hour 22:00-03:59 and amt > 600 | HOLD_CONFIRM |
 | R4 | 2.0 | Active | amt > 600 in shopping_net, misc_net, shopping_pos; amt > 250 in grocery_pos | ALERT |
 | R5 | 1.0 | Retired | Cardholder-to-merchant distance > 100 km | ALERT |
-| R6 | 2.0 | Active | First visit to the merchant, 10 or more prior transactions, amt > 750 | STEP_UP |
+| R6 | 2.0 | Shadow (active in v2) | First visit to the merchant, 10 or more prior transactions, amt > 750 | STEP_UP |
 | R7 | 2.0 | Active | 7 or more prior active days and 48-hour spend > 5 x two days of average daily spend | HOLD_CONFIRM |
 | R8 | 1.0 | Shadow | Merchant on risk list v1 (built from train only); scored on test only | BLOCK / HOLD_CONFIRM by tier |
 
@@ -130,7 +132,8 @@ The frozen v2 set was tagged, then run once on the test period with no changes.
 - **R6 decayed.** It relies on first visits to a merchant, which fall from 94.16% of
   transactions in January 2019 to 7.17% in December 2020, as cards build history. Its train
   numbers were partly a warm-up artifact: on the last 3 months of train it already showed
-  9.54% recall, against 7.04% on test. A change request to move it to shadow is drafted.
+  9.54% recall, against 7.04% on test. It was moved to shadow in rule set v2.1 through
+  the pull request process.
 - **R8 is not promoted:** 1.12% precision at 31.66 alerts per day, and 0 fraud that the
   active rules miss.
 - **16 cards appear only in the test period** and carry no history. All 16 were detected,
@@ -138,7 +141,7 @@ The frozen v2 set was tagged, then run once on the test period with no changes.
 
 Report: [reports/pvt_report.md](reports/pvt_report.md).
 
-## 7. Results (active set: R3, R4, R6, R7)
+## 7. Results (rule set v2, active rules R3, R4, R6, R7)
 
 | Metric | Train (tuned on) | Test (frozen, unseen) |
 |---|---|---|
@@ -162,7 +165,17 @@ detection.
 (2020), because transaction volume doubles. They stay under it in cases (32.42 and 27.42
 per day). This is treated as a peak-staffing finding, not a reason to change thresholds.
 
-![Train vs test](reports/figures/pvt_train_vs_test.png)
+**Rule set v2.1 (R6 in shadow):**
+
+| | Alerts per day | Cases per day | Precision | Recall | Value detection |
+|---|---|---|---|---|---|
+| Train | 37.36 | 16.79 | 31.77% | 84.92% | 98.04% |
+| Test | 41.02 | 18.63 | 22.30% | 82.75% | 97.41% |
+
+The test figures for v2.1 are an impact estimate, not out-of-sample validation. The change
+was decided after seeing the test period.
+
+![Train vs test, rule set v2](reports/figures/pvt_train_vs_test_v2.png)
 
 ## 8. Limitations
 - **Simulated data.** Fraud sits in narrow category, hour and amount bands, and its shape

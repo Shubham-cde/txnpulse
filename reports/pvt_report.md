@@ -5,7 +5,7 @@
 | Rules | Frozen rule set v2, git tag `rules-v2`. Run unchanged; no threshold was changed after this run. |
 | Test period | fraudTest.csv: 2020-06-21 12:14:25 to 2020-12-31 23:59:34, 194 days, 555,719 transactions, 2,145 fraud (0.386%), $1,133,324.68 of fraud |
 | Training history | Training rows are loaded as unscored history, so card windows continue across the split. Only test rows count in any metric. |
-| Sources | `outputs/test/` from `src/run_rules.py --period test`; `outputs/pvt/pvt_rule_comparison.csv` from `src/compare_pvt.py`; charts from `src/make_figures.py` |
+| Sources | `outputs/test/` from `src/run_rules.py --period test`; `outputs/pvt/pvt_rule_comparison.csv` from `src/compare_pvt.py`; charts from `src/make_figures.py`. The v2 comparison table and charts are kept in `reports/pvt_evidence/pvt_rule_comparison_v2.csv` and `reports/figures/pvt_*_v2.png`, because `run_all.py` now regenerates outputs for the current rule set (v2.1). |
 
 ## 1. Verdict
 
@@ -46,7 +46,7 @@
 
 Where a rule is unchanged, the train and test points overlap in the chart below.
 
-![Train vs test](figures/pvt_train_vs_test.png)
+![Train vs test](figures/pvt_train_vs_test_v2.png)
 
 ## 3. Why precision fell: the base rate
 - **Fraud is rarer in test:** 0.386% of transactions against 0.579% in train.
@@ -100,7 +100,7 @@ Monthly figures are in `monthly_active.csv`:
 - **July 2020 has the lowest recall (75.39%).** It is the one month that would justify a
   closer look in monitoring (Phase 7).
 
-![Monthly alerts on test](figures/pvt_monthly_alerts_test.png)
+![Monthly alerts on test](figures/pvt_monthly_alerts_test_v2.png)
 
 ## 5. R6: why it decayed
 R6 fires on a card's first transaction at a merchant. In test, cards carry about 18 months
@@ -231,8 +231,9 @@ these findings: R6 to shadow (proposed v2.1), or anything else prompted by secti
 
 ## 11. Actions
 1. Keep R3, R4 and R7 active unchanged. Watch R7's genuine alert rate in monitoring.
-2. Raise a change request to move R6 to shadow at the next review (evidence in section 5).
-   Its test-period figures will be an impact estimate (section 9).
+2. **Done:** R6 moved to shadow in rule set v2.1 (2026-11-17, see CHANGELOG). Its
+   test-period figures are an impact estimate (section 9): active set 41.02 alerts and
+   18.63 cases per day, precision 22.30%, recall 82.75%, value detection 97.41%.
 3. Do not promote R8. Rebuild or drop the merchant list at the next review.
 4. Plan December peak staffing: about 1.3 analysts on alerts, or one analyst working cases.
 5. Add July-style recall dips to the monitoring checks in Phase 7.

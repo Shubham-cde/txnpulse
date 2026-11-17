@@ -1,0 +1,11 @@
+rule,status,alerts_per_day_train,alerts_per_day_test,cases_per_day_train,cases_per_day_test,precision_pct_train,precision_pct_test,expected_test_precision_pct,genuine_alert_rate_pct_train,genuine_alert_rate_pct_test,txn_recall_pct_train,txn_recall_pct_test,value_detection_pct_train,value_detection_pct_test,card_detection_pct_train,card_detection_pct_test
+r1_velocity,retired,1.11,1.95,,,21.61,7.41,15.511,0.036,0.063,1.72,1.31,2.11,1.75,9.58,7.8
+r2_amount_spike,retired,51.91,58.11,,,9.36,6.74,6.428,1.96,1.899,34.75,35.43,55.73,57.56,90.94,95.41
+r3_late_night_high_value,active,8.78,8.21,5.33,5.46,63.37,53.77,53.512,0.134,0.133,39.82,39.91,68.38,68.95,96.33,96.33
+r4_risky_category_amount,active,20.76,20.49,13.34,14.49,46.7,36.83,36.832,0.461,0.454,69.37,68.25,93.31,93.13,98.82,98.62
+r5_distance_anomaly,retired,563.97,669.22,,,0.58,0.38,0.385,23.356,23.363,23.27,23.08,23.6,21.89,90.68,91.28
+r6_new_merchant_high_amount,active,6.09,2.1,4.84,1.87,42.21,37.1,32.708,0.147,0.046,18.4,7.04,32.37,12.7,71.26,42.66
+r7_spend_burst,active,23.6,26.55,6.67,7.07,33.01,23.18,24.697,0.659,0.715,55.74,55.66,63.91,64.35,79.4,78.9
+r8_risk_list_hit,shadow,,31.66,,30.06,,1.12,,,1.097,,3.22,,5.97,,25.69
+any_active,combined,37.8,41.2,17.21,18.78,31.4,22.21,23.349,1.08,1.123,84.92,82.75,98.04,97.41,99.08,98.62
+any_active_or_shadow,combined,37.8,71.66,17.21,46.65,31.4,12.77,23.349,1.08,2.191,84.92,82.75,98.04,97.41,99.08,98.62
