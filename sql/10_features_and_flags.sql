@@ -42,11 +42,17 @@ SELECT
     t.*,
     HOUR(t.ts) AS hour_of_day,
 
-    -- R1: RANGE counts every row whose ts is in [ts - 60 min, ts], including
-    -- the current row and any rows at the same second.
+    -- R1: rows with ts in [ts - 60 min, ts], including the current row.
+    -- Same-second rows are taken in trans_num order, like a stream would see
+    -- them (defect DEF-01): EXCLUDE TIES drops all same-second peers from the
+    -- RANGE frame, then the second term adds back only the earlier ones.
     COUNT(*) OVER (
         PARTITION BY t.card_id ORDER BY t.ts
-        RANGE BETWEEN INTERVAL 60 MINUTES PRECEDING AND CURRENT ROW
+        RANGE BETWEEN INTERVAL 60 MINUTES PRECEDING AND CURRENT ROW EXCLUDE TIES
+    )
+    + COUNT(*) OVER (
+        PARTITION BY t.card_id, t.ts ORDER BY t.trans_num
+        ROWS BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING
     ) AS txn_count_60m,
 
     -- R2, R6: history strictly before the current row.
@@ -67,11 +73,16 @@ SELECT
         PARTITION BY t.card_id, t.merchant ORDER BY t.ts, t.trans_num
     ) = 1 AS first_visit,
 
-    -- R7: spend in [ts - 24 h, ts], including the current row and same-second rows.
+    -- R7: spend in [ts - 24 h, ts], including the current row. Same-second
+    -- rows handled as in R1 (defect DEF-02).
     SUM(t.amt) OVER (
         PARTITION BY t.card_id ORDER BY t.ts
-        RANGE BETWEEN INTERVAL 24 HOURS PRECEDING AND CURRENT ROW
-    ) AS spend_24h,
+        RANGE BETWEEN INTERVAL 24 HOURS PRECEDING AND CURRENT ROW EXCLUDE TIES
+    )
+    + COALESCE(SUM(t.amt) OVER (
+        PARTITION BY t.card_id, t.ts ORDER BY t.trans_num
+        ROWS BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING
+    ), 0) AS spend_24h,
     b.baseline_daily_avg,
     b.prior_active_days
 FROM txn t
