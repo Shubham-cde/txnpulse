@@ -10,6 +10,8 @@ SQL_DIR = REPO_ROOT / "sql"
 DATA_DIR = REPO_ROOT / "data"
 OUTPUT_DIR = REPO_ROOT / "outputs"
 
+RISK_LIST_CSV = REPO_ROOT / "rules" / "risk_lists" / "merchant_risk_v1.csv"
+
 CSV_BY_PERIOD = {
     "train": DATA_DIR / "fraudTrain.csv",
     "test": DATA_DIR / "fraudTest.csv",
@@ -28,11 +30,16 @@ def connect(database=":memory:"):
     return con
 
 
+def fill_placeholders(sql_text, params):
+    # Plain replacement, not str.format: the SQL contains {...} struct literals.
+    for key, value in (params or {}).items():
+        sql_text = sql_text.replace("{" + key + "}", str(value))
+    return sql_text
+
+
 def load_csv(con, csv_path, table_name):
     template = (SQL_DIR / "00_load.sql").read_text(encoding="utf-8")
-    # Plain replacement, not str.format: the SQL contains a {...} struct literal.
-    sql = template.replace("{csv_path}", Path(csv_path).as_posix()).replace("{table_name}", table_name)
-    con.execute(sql)
+    con.execute(fill_placeholders(template, {"csv_path": Path(csv_path).as_posix(), "table_name": table_name}))
 
 
 def load_period(con, period):
@@ -78,9 +85,9 @@ def has_statements(sql_text):
     return bool(code_lines)
 
 
-def run_sql_file(con, sql_path):
+def run_sql_file(con, sql_path, params=None):
     """Run a SQL file of statements with no result sets (e.g. CREATE TABLE)."""
-    con.execute(Path(sql_path).read_text(encoding="utf-8"))
+    con.execute(fill_placeholders(Path(sql_path).read_text(encoding="utf-8"), params))
 
 
 def query_to_df(con, query):
@@ -93,9 +100,10 @@ def query_to_df(con, query):
     return df
 
 
-def run_named_queries(con, sql_path, out_dir):
+def run_named_queries(con, sql_path, out_dir, params=None):
     """Run the preamble, then each named query, saving each result to out_dir/<name>.csv."""
-    preamble, named = split_named_queries(Path(sql_path).read_text(encoding="utf-8"))
+    sql_text = fill_placeholders(Path(sql_path).read_text(encoding="utf-8"), params)
+    preamble, named = split_named_queries(sql_text)
     if has_statements(preamble):
         con.execute(preamble)
 

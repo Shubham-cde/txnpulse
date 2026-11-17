@@ -1,6 +1,6 @@
 # TxnPulse — Transaction-Monitoring Rules System
 
-Status: work in progress (Phase 2, rule testing, done). The full write-up comes in Phase 4.
+Status: work in progress (Phase 3: rules tuned on train and frozen as v2; post-deployment validation pending). The rule table below shows v1 starting values; see reports/tuning_report.md for v2. The full write-up comes in Phase 4.
 
 TxnPulse runs on simulated card data and covers the work of a bank's fraud rules team:
 - write transaction-monitoring rules in SQL

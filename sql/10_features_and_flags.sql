@@ -83,6 +83,15 @@ SELECT
         PARTITION BY t.card_id, t.ts ORDER BY t.trans_num
         ROWS BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING
     ), 0) AS spend_24h,
+    -- R7 v2 window: spend in [ts - 48 h, ts], same tie handling.
+    SUM(t.amt) OVER (
+        PARTITION BY t.card_id ORDER BY t.ts
+        RANGE BETWEEN INTERVAL 48 HOURS PRECEDING AND CURRENT ROW EXCLUDE TIES
+    )
+    + COALESCE(SUM(t.amt) OVER (
+        PARTITION BY t.card_id, t.ts ORDER BY t.trans_num
+        ROWS BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING
+    ), 0) AS spend_48h,
     b.baseline_daily_avg,
     b.prior_active_days
 FROM txn t
@@ -96,44 +105,58 @@ LEFT JOIN card_daily_baseline b
 -- threshold would either miss grocery_pos or flood the other three.
 -- No upper caps: train has no fraud above $1,500, but that is a simulator
 -- artifact, not fraudster behaviour.
+-- v2.0 (sweep r4_sweep, train): grocery_pos 300 -> 250 adds 613 fraud for 798
+-- alerts; the other three 500 -> 600 drop 1,877 alerts for 3 fraud.
 CREATE OR REPLACE TABLE r4_category_threshold(category, min_amt) AS
 VALUES
-    ('shopping_net', 500.0),
-    ('misc_net',     500.0),
-    ('shopping_pos', 500.0),
-    ('grocery_pos',  300.0);
+    ('shopping_net', 600.0),
+    ('misc_net',     600.0),
+    ('shopping_pos', 600.0),
+    ('grocery_pos',  250.0);
 
 
 CREATE OR REPLACE TABLE flags AS
 SELECT
     f.*,
 
-    -- R1 Card velocity. Action: ALERT.
+    -- Status of each rule (active / retired / shadow) lives in rule_catalogue
+    -- (sql/20). Retired rules are still computed at their last version so
+    -- their volume can be monitored; they do not alert.
+
+    -- R1 Card velocity v1.1. Action: ALERT. RETIRED in v2 (tuning report):
+    -- in the tuned set it adds 466 alerts for 5 fraud, and wider windows only
+    -- lower precision.
     COALESCE(f.txn_count_60m >= 5, FALSE) AS r1_velocity,
 
-    -- R2 Amount spike. Action: STEP_UP.
+    -- R2 Amount spike v1.0. Action: STEP_UP. RETIRED in v2: even the tuned
+    -- variant (5x, amt > 500) adds 4,573 alerts for 25 fraud on top of R4 and R7.
     -- Known gap: a card's first-ever transaction can never fire (no history).
     COALESCE(f.prior_txn_count >= 1 AND f.amt > 5 * f.avg_amt_prev30, FALSE) AS r2_amount_spike,
 
-    -- R3 Late-night high value. Action: HOLD_CONFIRM.
-    COALESCE((f.hour_of_day >= 22 OR f.hour_of_day < 4) AND f.amt > 500, FALSE) AS r3_late_night_high_value,
+    -- R3 Late-night high value v2.0. Action: HOLD_CONFIRM.
+    -- 500 -> 600: in the tuned set the $500-600 band adds 916 alerts for 27 fraud.
+    COALESCE((f.hour_of_day >= 22 OR f.hour_of_day < 4) AND f.amt > 600, FALSE) AS r3_late_night_high_value,
 
-    -- R4 Risky category + amount. Action: ALERT.
+    -- R4 Risky category + amount v2.0. Action: ALERT.
     -- Categories missing from the lookup get NULL min_amt and do not fire.
     COALESCE(f.amt > r4.min_amt, FALSE) AS r4_risky_category_amount,
 
-    -- R5 Distance anomaly. Action: ALERT.
-    -- Phase 0 found no distance signal; kept so Phase 3 can retire it on evidence.
+    -- R5 Distance anomaly v1.0. Action: ALERT. RETIRED in v2: precision is
+    -- 0.53-0.58% at every distance from 25 to 125 km, the same as the base rate.
     COALESCE(f.distance_km > 100, FALSE) AS r5_distance_anomaly,
 
-    -- R6 New merchant + high amount. Action: STEP_UP.
-    -- Starting values N = 10 prior txns, Y = $300; sensitivity in sql/40.
+    -- R6 New merchant + high amount v2.0. Action: STEP_UP.
     -- N keeps brand-new cards out: every merchant is "new" to them.
-    COALESCE(f.first_visit AND f.prior_txn_count >= 10 AND f.amt > 300, FALSE) AS r6_new_merchant_high_amount,
+    -- Y 300 -> 750 (r6_sweep): precision 17% -> 42%, alerts 23.2 -> 6.1 per day.
+    -- N barely matters in the sweep, so it stays at 10.
+    COALESCE(f.first_visit AND f.prior_txn_count >= 10 AND f.amt > 750, FALSE) AS r6_new_merchant_high_amount,
 
-    -- R7 24-hour spend burst. Action: HOLD_CONFIRM.
-    -- Starting value: at least 7 prior active days, so the baseline is not one
-    -- or two days of spend.
-    COALESCE(f.prior_active_days >= 7 AND f.spend_24h > 3 * f.baseline_daily_avg, FALSE) AS r7_spend_burst_24h
+    -- R7 Spend burst v2.0. Action: HOLD_CONFIRM.
+    -- v2: 48-hour spend > 5 x two days of baseline (r7_sweep). The 24 h / 3x
+    -- version fired 178 times a day at 6% precision; 48 h / 5x fires 23.6 a day
+    -- at 33%. The fraud spree in this data lasts about 45 hours, which a
+    -- 48-hour window covers. A spend floor changed little at 48 h, so none.
+    -- At least 7 prior active days, so the baseline is not one or two days.
+    COALESCE(f.prior_active_days >= 7 AND f.spend_48h > 5 * 2 * f.baseline_daily_avg, FALSE) AS r7_spend_burst
 FROM features f
 LEFT JOIN r4_category_threshold r4 USING (category);

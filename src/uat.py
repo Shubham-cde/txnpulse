@@ -6,7 +6,9 @@ target; the case passes when the rule's flag on that row equals expected_hit.
 
 import csv
 
-from db import REPO_ROOT, SQL_DIR, connect, run_sql_file
+from pathlib import Path
+
+from db import REPO_ROOT, RISK_LIST_CSV, SQL_DIR, connect, fill_placeholders, run_sql_file, split_named_queries
 
 UAT_CASES_CSV = REPO_ROOT / "tests" / "uat_cases.csv"
 
@@ -17,7 +19,8 @@ RULE_COLUMNS = {
     "R4": "r4_risky_category_amount",
     "R5": "r5_distance_anomaly",
     "R6": "r6_new_merchant_high_amount",
-    "R7": "r7_spend_burst_24h",
+    "R7": "r7_spend_burst",
+    "R8": "r8_risk_list_hit",
 }
 
 # Same column names and types as sql/00_load.sql produces, plus is_scored.
@@ -70,6 +73,16 @@ def parse_expected(value):
     raise ValueError(f"expected_hit must be true or false, got {value!r}")
 
 
+def add_r8(con):
+    """Run the flag-building part of sql/15 (not its report query) with list v1."""
+    sql_text = fill_placeholders(
+        Path(SQL_DIR / "15_r8_risk_list.sql").read_text(encoding="utf-8"),
+        {"risk_list_csv": RISK_LIST_CSV.as_posix()},
+    )
+    preamble, _ = split_named_queries(sql_text)
+    con.execute(preamble)
+
+
 def run_case(rows):
     """Load the case's rows as `txn`, run sql/10 and return the target row's flag value."""
     target = target_row(rows)
@@ -90,6 +103,7 @@ def run_case(rows):
     )
     con.execute(TXN_TABLE_SQL)
     run_sql_file(con, SQL_DIR / "10_features_and_flags.sql")
+    add_r8(con)
 
     result = con.execute(
         f"SELECT {rule_column} FROM flags WHERE trans_num = ?", [target["trans_num"]]

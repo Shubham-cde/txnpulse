@@ -1,0 +1,9 @@
+list_version,merchant,tier,train_txns,train_fraud_txns,train_fraud_rate_pct,rate_multiple,built_from,data_through
+v1,fraud_Kozey-Boehm,very_high,1866,48,2.572,4.44,fraudTrain.csv,2020-06-21
+v1,"fraud_Herman, Treutel and Dickens",very_high,1300,33,2.538,4.39,fraudTrain.csv,2020-06-21
+v1,fraud_Kerluke-Abshire,high,1838,41,2.231,3.85,fraudTrain.csv,2020-06-21
+v1,fraud_Brown PLC,high,1176,26,2.211,3.82,fraudTrain.csv,2020-06-21
+v1,fraud_Goyette Inc,high,1943,42,2.162,3.73,fraudTrain.csv,2020-06-21
+v1,fraud_Terry-Huel,high,1996,43,2.154,3.72,fraudTrain.csv,2020-06-21
+v1,fraud_Jast Ltd,high,1953,42,2.151,3.72,fraudTrain.csv,2020-06-21
+v1,"fraud_Schmeler, Bashirian and Price",high,1968,41,2.083,3.6,fraudTrain.csv,2020-06-21

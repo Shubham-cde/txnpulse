@@ -74,18 +74,22 @@ UAT-R2-04,R2,,0,,UAT-R2-04-28,2020-03-02 03:00:00,card_A,merchant_a,misc_pos,10.
 UAT-R2-04,R2,,0,,UAT-R2-04-29,2020-03-02 04:00:00,card_A,merchant_a,misc_pos,10.00,40.0,-75.0,40.100,-75.0
 UAT-R2-04,R2,,0,,UAT-R2-04-30,2020-03-02 05:00:00,card_A,merchant_a,misc_pos,10.00,40.0,-75.0,40.100,-75.0
 UAT-R2-04,R2,,0,,UAT-R2-04-31,2020-03-02 06:00:00,card_A,merchant_a,misc_pos,10.00,40.0,-75.0,40.100,-75.0
-UAT-R2-04,R2,"Window edge: 1000.00, then 30 x 10.00, then 60.00; only the previous 30 count (avg 10)",1,true,UAT-R2-04-32,2020-03-02 07:00:00,card_A,merchant_a,misc_pos,60.00,40.0,-75.0,40.100,-75.0
+UAT-R2-04,R2,"Window edge: 1000.00 sits 31 positions back, then 30 x 10.00, then 60.00; only the previous 30 count (avg 10)",1,true,UAT-R2-04-32,2020-03-02 07:00:00,card_A,merchant_a,misc_pos,60.00,40.0,-75.0,40.100,-75.0
 UAT-R3-01,R3,600.00 at 21:59: before the window,1,false,UAT-R3-01-01,2020-03-02 21:59:00,card_A,merchant_a,misc_pos,600.00,40.0,-75.0,40.100,-75.0
-UAT-R3-02,R3,600.00 at 22:00: window start,1,true,UAT-R3-02-01,2020-03-02 22:00:00,card_A,merchant_a,misc_pos,600.00,40.0,-75.0,40.100,-75.0
-UAT-R3-03,R3,Exactly 500.00 at 03:59: amount not above 500,1,false,UAT-R3-03-01,2020-03-02 03:59:00,card_A,merchant_a,misc_pos,500.00,40.0,-75.0,40.100,-75.0
-UAT-R3-04,R3,"500.01 at 03:59: inside window, above 500",1,true,UAT-R3-04-01,2020-03-02 03:59:00,card_A,merchant_a,misc_pos,500.01,40.0,-75.0,40.100,-75.0
-UAT-R3-05,R3,600.00 at 04:00: window has ended,1,false,UAT-R3-05-01,2020-03-02 04:00:00,card_A,merchant_a,misc_pos,600.00,40.0,-75.0,40.100,-75.0
-UAT-R3-06,R3,600.00 at 00:00: midnight is inside the window,1,true,UAT-R3-06-01,2020-03-02 00:00:00,card_A,merchant_a,misc_pos,600.00,40.0,-75.0,40.100,-75.0
-UAT-R4-01,R4,grocery_pos at exactly 300.00: not above its threshold,1,false,UAT-R4-01-01,2020-03-02 12:00:00,card_A,merchant_a,grocery_pos,300.00,40.0,-75.0,40.100,-75.0
-UAT-R4-02,R4,grocery_pos at 300.01: above its threshold,1,true,UAT-R4-02-01,2020-03-02 12:00:00,card_A,merchant_a,grocery_pos,300.01,40.0,-75.0,40.100,-75.0
-UAT-R4-03,R4,shopping_net at exactly 500.00: not above its threshold,1,false,UAT-R4-03-01,2020-03-02 12:00:00,card_A,merchant_a,shopping_net,500.00,40.0,-75.0,40.100,-75.0
-UAT-R4-04,R4,shopping_net at 500.01: above its threshold,1,true,UAT-R4-04-01,2020-03-02 12:00:00,card_A,merchant_a,shopping_net,500.01,40.0,-75.0,40.100,-75.0
+UAT-R3-02,R3,600.01 at 22:00: window start (v2 threshold 600; v1 case used 600.00 against 500),1,true,UAT-R3-02-01,2020-03-02 22:00:00,card_A,merchant_a,misc_pos,600.01,40.0,-75.0,40.100,-75.0
+UAT-R3-03,R3,Exactly 500.00 at 03:59: amount not above the threshold,1,false,UAT-R3-03-01,2020-03-02 03:59:00,card_A,merchant_a,misc_pos,500.00,40.0,-75.0,40.100,-75.0
+UAT-R3-04,R3,"600.01 at 03:59: inside window, above 600",1,true,UAT-R3-04-01,2020-03-02 03:59:00,card_A,merchant_a,misc_pos,600.01,40.0,-75.0,40.100,-75.0
+UAT-R3-05,R3,700.00 at 04:00: window has ended,1,false,UAT-R3-05-01,2020-03-02 04:00:00,card_A,merchant_a,misc_pos,700.00,40.0,-75.0,40.100,-75.0
+UAT-R3-06,R3,700.00 at 00:00: midnight is inside the window,1,true,UAT-R3-06-01,2020-03-02 00:00:00,card_A,merchant_a,misc_pos,700.00,40.0,-75.0,40.100,-75.0
+UAT-R3-07,R3,"Exactly 600.00 at 03:59: at the v2 threshold, not above",1,false,UAT-R3-07-01,2020-03-02 03:59:00,card_A,merchant_a,misc_pos,600.00,40.0,-75.0,40.100,-75.0
+UAT-R3-08,R3,"700.00 at 21:59: amount clears the threshold, hour does not",1,false,UAT-R3-08-01,2020-03-02 21:59:00,card_A,merchant_a,misc_pos,700.00,40.0,-75.0,40.100,-75.0
+UAT-R4-01,R4,grocery_pos at exactly 250.00: not above its v2 threshold,1,false,UAT-R4-01-01,2020-03-02 12:00:00,card_A,merchant_a,grocery_pos,250.00,40.0,-75.0,40.100,-75.0
+UAT-R4-02,R4,grocery_pos at 250.01: above its v2 threshold,1,true,UAT-R4-02-01,2020-03-02 12:00:00,card_A,merchant_a,grocery_pos,250.01,40.0,-75.0,40.100,-75.0
+UAT-R4-03,R4,shopping_net at exactly 600.00: not above its v2 threshold,1,false,UAT-R4-03-01,2020-03-02 12:00:00,card_A,merchant_a,shopping_net,600.00,40.0,-75.0,40.100,-75.0
+UAT-R4-04,R4,shopping_net at 600.01: above its v2 threshold,1,true,UAT-R4-04-01,2020-03-02 12:00:00,card_A,merchant_a,shopping_net,600.01,40.0,-75.0,40.100,-75.0
 UAT-R4-05,R4,shopping_net at 400.00: above the grocery_pos threshold but below its own,1,false,UAT-R4-05-01,2020-03-02 12:00:00,card_A,merchant_a,shopping_net,400.00,40.0,-75.0,40.100,-75.0
+UAT-R4-07,R4,misc_net at 600.01: above its v2 threshold,1,true,UAT-R4-07-01,2020-03-02 12:00:00,card_A,merchant_a,misc_net,600.01,40.0,-75.0,40.100,-75.0
+UAT-R4-08,R4,shopping_pos at exactly 600.00: not above its v2 threshold,1,false,UAT-R4-08-01,2020-03-02 12:00:00,card_A,merchant_a,shopping_pos,600.00,40.0,-75.0,40.100,-75.0
 UAT-R4-06,R4,gas_transport at 5000.00: category not in the lookup,1,false,UAT-R4-06-01,2020-03-02 12:00:00,card_A,merchant_a,gas_transport,5000.00,40.0,-75.0,40.100,-75.0
 UAT-R5-01,R5,Merchant 0.899 deg north (about 99.96 km): not above 100 km,1,false,UAT-R5-01-01,2020-03-02 12:00:00,card_A,merchant_a,misc_pos,20.00,40.0,-75.0,40.899,-75.0
 UAT-R5-02,R5,Merchant 0.900 deg north (about 100.08 km): above 100 km,1,true,UAT-R5-02-01,2020-03-02 12:00:00,card_A,merchant_a,misc_pos,20.00,40.0,-75.0,40.900,-75.0
@@ -100,7 +104,7 @@ UAT-R6-01,R6,,0,,UAT-R6-01-07,2020-03-01 14:00:00,card_A,merchant_a,misc_pos,20.
 UAT-R6-01,R6,,0,,UAT-R6-01-08,2020-03-01 15:00:00,card_A,merchant_a,misc_pos,20.00,40.0,-75.0,40.100,-75.0
 UAT-R6-01,R6,,0,,UAT-R6-01-09,2020-03-01 16:00:00,card_A,merchant_a,misc_pos,20.00,40.0,-75.0,40.100,-75.0
 UAT-R6-01,R6,,0,,UAT-R6-01-10,2020-03-01 17:00:00,card_A,merchant_a,misc_pos,20.00,40.0,-75.0,40.100,-75.0
-UAT-R6-01,R6,"Exactly 10 prior txns, first visit to merchant_b, 300.01",1,true,UAT-R6-01-11,2020-03-02 12:00:00,card_A,merchant_b,misc_pos,300.01,40.0,-75.0,40.100,-75.0
+UAT-R6-01,R6,"Exactly 10 prior txns, first visit to merchant_b, 750.01 (v2 threshold 750)",1,true,UAT-R6-01-11,2020-03-02 12:00:00,card_A,merchant_b,misc_pos,750.01,40.0,-75.0,40.100,-75.0
 UAT-R6-02,R6,,0,,UAT-R6-02-01,2020-03-01 08:00:00,card_A,merchant_a,misc_pos,20.00,40.0,-75.0,40.100,-75.0
 UAT-R6-02,R6,,0,,UAT-R6-02-02,2020-03-01 09:00:00,card_A,merchant_a,misc_pos,20.00,40.0,-75.0,40.100,-75.0
 UAT-R6-02,R6,,0,,UAT-R6-02-03,2020-03-01 10:00:00,card_A,merchant_a,misc_pos,20.00,40.0,-75.0,40.100,-75.0
@@ -111,7 +115,7 @@ UAT-R6-02,R6,,0,,UAT-R6-02-07,2020-03-01 14:00:00,card_A,merchant_a,misc_pos,20.
 UAT-R6-02,R6,,0,,UAT-R6-02-08,2020-03-01 15:00:00,card_A,merchant_a,misc_pos,20.00,40.0,-75.0,40.100,-75.0
 UAT-R6-02,R6,,0,,UAT-R6-02-09,2020-03-01 16:00:00,card_A,merchant_a,misc_pos,20.00,40.0,-75.0,40.100,-75.0
 UAT-R6-02,R6,,0,,UAT-R6-02-10,2020-03-01 17:00:00,card_A,merchant_a,misc_pos,20.00,40.0,-75.0,40.100,-75.0
-UAT-R6-02,R6,"Exactly 10 prior txns, first visit to merchant_b, exactly 300.00",1,false,UAT-R6-02-11,2020-03-02 12:00:00,card_A,merchant_b,misc_pos,300.00,40.0,-75.0,40.100,-75.0
+UAT-R6-02,R6,"Exactly 10 prior txns, first visit to merchant_b, exactly 750.00",1,false,UAT-R6-02-11,2020-03-02 12:00:00,card_A,merchant_b,misc_pos,750.00,40.0,-75.0,40.100,-75.0
 UAT-R6-03,R6,,0,,UAT-R6-03-01,2020-03-01 08:00:00,card_A,merchant_a,misc_pos,20.00,40.0,-75.0,40.100,-75.0
 UAT-R6-03,R6,,0,,UAT-R6-03-02,2020-03-01 09:00:00,card_A,merchant_a,misc_pos,20.00,40.0,-75.0,40.100,-75.0
 UAT-R6-03,R6,,0,,UAT-R6-03-03,2020-03-01 10:00:00,card_A,merchant_a,misc_pos,20.00,40.0,-75.0,40.100,-75.0
@@ -142,14 +146,14 @@ UAT-R7-01,R7,,0,,UAT-R7-01-04,2020-03-04 12:00:00,card_A,merchant_a,misc_pos,10.
 UAT-R7-01,R7,,0,,UAT-R7-01-05,2020-03-05 12:00:00,card_A,merchant_a,misc_pos,10.00,40.0,-75.0,40.100,-75.0
 UAT-R7-01,R7,,0,,UAT-R7-01-06,2020-03-06 12:00:00,card_A,merchant_a,misc_pos,10.00,40.0,-75.0,40.100,-75.0
 UAT-R7-01,R7,,0,,UAT-R7-01-07,2020-03-07 12:00:00,card_A,merchant_a,misc_pos,10.00,40.0,-75.0,40.100,-75.0
-UAT-R7-01,R7,"7 prior active days at 10.00, then 31.00: 31 > 3 x 10",1,true,UAT-R7-01-08,2020-03-08 13:00:00,card_A,merchant_a,misc_pos,31.00,40.0,-75.0,40.100,-75.0
+UAT-R7-01,R7,"7 prior active days at 10.00, then 90.01: 48h spend 100.01 > 5 x 2 x 10",1,true,UAT-R7-01-08,2020-03-08 13:00:00,card_A,merchant_a,misc_pos,90.01,40.0,-75.0,40.100,-75.0
 UAT-R7-02,R7,,0,,UAT-R7-02-01,2020-03-01 12:00:00,card_A,merchant_a,misc_pos,10.00,40.0,-75.0,40.100,-75.0
 UAT-R7-02,R7,,0,,UAT-R7-02-02,2020-03-02 12:00:00,card_A,merchant_a,misc_pos,10.00,40.0,-75.0,40.100,-75.0
 UAT-R7-02,R7,,0,,UAT-R7-02-03,2020-03-03 12:00:00,card_A,merchant_a,misc_pos,10.00,40.0,-75.0,40.100,-75.0
 UAT-R7-02,R7,,0,,UAT-R7-02-04,2020-03-04 12:00:00,card_A,merchant_a,misc_pos,10.00,40.0,-75.0,40.100,-75.0
 UAT-R7-02,R7,,0,,UAT-R7-02-05,2020-03-05 12:00:00,card_A,merchant_a,misc_pos,10.00,40.0,-75.0,40.100,-75.0
 UAT-R7-02,R7,,0,,UAT-R7-02-06,2020-03-06 12:00:00,card_A,merchant_a,misc_pos,10.00,40.0,-75.0,40.100,-75.0
-UAT-R7-02,R7,"Only 6 prior active days at 10.00, then 31.00: below the 7-day minimum",1,false,UAT-R7-02-07,2020-03-07 13:00:00,card_A,merchant_a,misc_pos,31.00,40.0,-75.0,40.100,-75.0
+UAT-R7-02,R7,"Only 6 prior active days at 10.00, then 200.00: below the 7-day minimum",1,false,UAT-R7-02-07,2020-03-07 13:00:00,card_A,merchant_a,misc_pos,200.00,40.0,-75.0,40.100,-75.0
 UAT-R7-03,R7,,0,,UAT-R7-03-01,2020-03-01 12:00:00,card_A,merchant_a,misc_pos,10.00,40.0,-75.0,40.100,-75.0
 UAT-R7-03,R7,,0,,UAT-R7-03-02,2020-03-02 12:00:00,card_A,merchant_a,misc_pos,10.00,40.0,-75.0,40.100,-75.0
 UAT-R7-03,R7,,0,,UAT-R7-03-03,2020-03-03 12:00:00,card_A,merchant_a,misc_pos,10.00,40.0,-75.0,40.100,-75.0
@@ -157,7 +161,7 @@ UAT-R7-03,R7,,0,,UAT-R7-03-04,2020-03-04 12:00:00,card_A,merchant_a,misc_pos,10.
 UAT-R7-03,R7,,0,,UAT-R7-03-05,2020-03-05 12:00:00,card_A,merchant_a,misc_pos,10.00,40.0,-75.0,40.100,-75.0
 UAT-R7-03,R7,,0,,UAT-R7-03-06,2020-03-06 12:00:00,card_A,merchant_a,misc_pos,10.00,40.0,-75.0,40.100,-75.0
 UAT-R7-03,R7,,0,,UAT-R7-03-07,2020-03-07 12:00:00,card_A,merchant_a,misc_pos,10.00,40.0,-75.0,40.100,-75.0
-UAT-R7-03,R7,"7 prior active days at 10.00, then exactly 30.00 = 3 x baseline: not above",1,false,UAT-R7-03-08,2020-03-08 13:00:00,card_A,merchant_a,misc_pos,30.00,40.0,-75.0,40.100,-75.0
+UAT-R7-03,R7,"7 prior active days at 10.00, then 90.00: 48h spend exactly 100.00, not above",1,false,UAT-R7-03-08,2020-03-08 13:00:00,card_A,merchant_a,misc_pos,90.00,40.0,-75.0,40.100,-75.0
 UAT-R7-04,R7,,0,,UAT-R7-04-01,2020-03-01 12:00:00,card_A,merchant_a,misc_pos,10.00,40.0,-75.0,40.100,-75.0
 UAT-R7-04,R7,,0,,UAT-R7-04-02,2020-03-02 12:00:00,card_A,merchant_a,misc_pos,10.00,40.0,-75.0,40.100,-75.0
 UAT-R7-04,R7,,0,,UAT-R7-04-03,2020-03-03 12:00:00,card_A,merchant_a,misc_pos,10.00,40.0,-75.0,40.100,-75.0
@@ -165,7 +169,7 @@ UAT-R7-04,R7,,0,,UAT-R7-04-04,2020-03-04 12:00:00,card_A,merchant_a,misc_pos,10.
 UAT-R7-04,R7,,0,,UAT-R7-04-05,2020-03-05 12:00:00,card_A,merchant_a,misc_pos,10.00,40.0,-75.0,40.100,-75.0
 UAT-R7-04,R7,,0,,UAT-R7-04-06,2020-03-06 12:00:00,card_A,merchant_a,misc_pos,10.00,40.0,-75.0,40.100,-75.0
 UAT-R7-04,R7,,0,,UAT-R7-04-07,2020-03-07 12:00:00,card_A,merchant_a,misc_pos,10.00,40.0,-75.0,40.100,-75.0
-UAT-R7-04,R7,Txn exactly 24h earlier is inside the window: 25.00 + 10.00 = 35.00,1,true,UAT-R7-04-08,2020-03-08 12:00:00,card_A,merchant_a,misc_pos,25.00,40.0,-75.0,40.100,-75.0
+UAT-R7-04,R7,Txn exactly 48h earlier is inside the window: 80.01 + 10.00 + 10.00 = 100.01,1,true,UAT-R7-04-08,2020-03-08 12:00:00,card_A,merchant_a,misc_pos,80.01,40.0,-75.0,40.100,-75.0
 UAT-R7-05,R7,,0,,UAT-R7-05-01,2020-03-01 12:00:00,card_A,merchant_a,misc_pos,10.00,40.0,-75.0,40.100,-75.0
 UAT-R7-05,R7,,0,,UAT-R7-05-02,2020-03-02 12:00:00,card_A,merchant_a,misc_pos,10.00,40.0,-75.0,40.100,-75.0
 UAT-R7-05,R7,,0,,UAT-R7-05-03,2020-03-03 12:00:00,card_A,merchant_a,misc_pos,10.00,40.0,-75.0,40.100,-75.0
@@ -173,7 +177,7 @@ UAT-R7-05,R7,,0,,UAT-R7-05-04,2020-03-04 12:00:00,card_A,merchant_a,misc_pos,10.
 UAT-R7-05,R7,,0,,UAT-R7-05-05,2020-03-05 12:00:00,card_A,merchant_a,misc_pos,10.00,40.0,-75.0,40.100,-75.0
 UAT-R7-05,R7,,0,,UAT-R7-05-06,2020-03-06 12:00:00,card_A,merchant_a,misc_pos,10.00,40.0,-75.0,40.100,-75.0
 UAT-R7-05,R7,,0,,UAT-R7-05-07,2020-03-07 12:00:00,card_A,merchant_a,misc_pos,10.00,40.0,-75.0,40.100,-75.0
-UAT-R7-05,R7,Txn 24h plus 1 second earlier is outside the window: 25.00 only,1,false,UAT-R7-05-08,2020-03-08 12:00:01,card_A,merchant_a,misc_pos,25.00,40.0,-75.0,40.100,-75.0
+UAT-R7-05,R7,Txn 48h plus 1 second earlier is outside the window: 80.01 + 10.00 = 90.01,1,false,UAT-R7-05-08,2020-03-08 12:00:01,card_A,merchant_a,misc_pos,80.01,40.0,-75.0,40.100,-75.0
 UAT-R7-06,R7,,0,,UAT-R7-06-01,2020-03-01 12:00:00,card_A,merchant_a,misc_pos,10.00,40.0,-75.0,40.100,-75.0
 UAT-R7-06,R7,,0,,UAT-R7-06-02,2020-03-02 12:00:00,card_A,merchant_a,misc_pos,10.00,40.0,-75.0,40.100,-75.0
 UAT-R7-06,R7,,0,,UAT-R7-06-03,2020-03-03 12:00:00,card_A,merchant_a,misc_pos,10.00,40.0,-75.0,40.100,-75.0
@@ -182,7 +186,7 @@ UAT-R7-06,R7,,0,,UAT-R7-06-05,2020-03-05 12:00:00,card_A,merchant_a,misc_pos,10.
 UAT-R7-06,R7,,0,,UAT-R7-06-06,2020-03-06 12:00:00,card_A,merchant_a,misc_pos,10.00,40.0,-75.0,40.100,-75.0
 UAT-R7-06,R7,,0,,UAT-R7-06-07,2020-03-07 12:00:00,card_A,merchant_a,misc_pos,10.00,40.0,-75.0,40.100,-75.0
 UAT-R7-06,R7,,0,,UAT-R7-06-08,2020-03-08 01:00:00,card_A,merchant_a,misc_pos,100.00,40.0,-75.0,40.100,-75.0
-UAT-R7-06,R7,Earlier spend on the current day (100.00 at 01:00) is not in the baseline; target 5.00 at 13:00,1,true,UAT-R7-06-09,2020-03-08 13:00:00,card_A,merchant_a,misc_pos,5.00,40.0,-75.0,40.100,-75.0
+UAT-R7-06,R7,"Earlier spend on the current day (100.00 at 01:00) is not in the baseline; target 5.00 at 13:00, 48h spend 115.00",1,true,UAT-R7-06-09,2020-03-08 13:00:00,card_A,merchant_a,misc_pos,5.00,40.0,-75.0,40.100,-75.0
 UAT-R7-07,R7,"Card's first-ever transaction, 5000.00: no baseline",1,false,UAT-R7-07-01,2020-03-08 12:00:00,card_A,merchant_a,misc_pos,5000.00,40.0,-75.0,40.100,-75.0
 UAT-R7-08,R7,,0,,UAT-R7-08-01,2020-03-01 12:00:00,card_A,merchant_a,misc_pos,10.00,40.0,-75.0,40.100,-75.0
 UAT-R7-08,R7,,0,,UAT-R7-08-02,2020-03-02 12:00:00,card_A,merchant_a,misc_pos,10.00,40.0,-75.0,40.100,-75.0
@@ -192,7 +196,7 @@ UAT-R7-08,R7,,0,,UAT-R7-08-05,2020-03-05 12:00:00,card_A,merchant_a,misc_pos,10.
 UAT-R7-08,R7,,0,,UAT-R7-08-06,2020-03-06 12:00:00,card_A,merchant_a,misc_pos,10.00,40.0,-75.0,40.100,-75.0
 UAT-R7-08,R7,,0,,UAT-R7-08-07,2020-03-07 12:00:00,card_A,merchant_a,misc_pos,10.00,40.0,-75.0,40.100,-75.0
 UAT-R7-08,R7,,0,,UAT-R7-08-08,2020-03-08 23:00:00,card_A,merchant_a,misc_pos,20.00,40.0,-75.0,40.100,-75.0
-UAT-R7-08,R7,Midnight wrap: 20.00 at 23:00 and 15.00 at 00:30 next day; 24h spend 35.00 > 3 x 11.25,1,true,UAT-R7-08-09,2020-03-09 00:30:00,card_A,merchant_a,misc_pos,15.00,40.0,-75.0,40.100,-75.0
+UAT-R7-08,R7,Midnight wrap: 20.00 at 23:00 and 90.00 at 00:30 next day; 48h spend 120.00 > 5 x 2 x 11.25,1,true,UAT-R7-08-09,2020-03-09 00:30:00,card_A,merchant_a,misc_pos,90.00,40.0,-75.0,40.100,-75.0
 UAT-R7-09,R7,,0,,UAT-R7-09-01,2020-03-01 12:00:00,card_A,merchant_a,misc_pos,10.00,40.0,-75.0,40.100,-75.0
 UAT-R7-09,R7,,0,,UAT-R7-09-02,2020-03-02 12:00:00,card_A,merchant_a,misc_pos,10.00,40.0,-75.0,40.100,-75.0
 UAT-R7-09,R7,,0,,UAT-R7-09-03,2020-03-03 12:00:00,card_A,merchant_a,misc_pos,10.00,40.0,-75.0,40.100,-75.0
@@ -200,8 +204,8 @@ UAT-R7-09,R7,,0,,UAT-R7-09-04,2020-03-04 12:00:00,card_A,merchant_a,misc_pos,10.
 UAT-R7-09,R7,,0,,UAT-R7-09-05,2020-03-05 12:00:00,card_A,merchant_a,misc_pos,10.00,40.0,-75.0,40.100,-75.0
 UAT-R7-09,R7,,0,,UAT-R7-09-06,2020-03-06 12:00:00,card_A,merchant_a,misc_pos,10.00,40.0,-75.0,40.100,-75.0
 UAT-R7-09,R7,,0,,UAT-R7-09-07,2020-03-07 12:00:00,card_A,merchant_a,misc_pos,10.00,40.0,-75.0,40.100,-75.0
-UAT-R7-09,R7,"Duplicate timestamps: two 20.00 txns at the same second, target is 1st in trans_num order (24h spend 20.00)",1,false,UAT-R7-09-08,2020-03-08 13:00:00,card_A,merchant_a,misc_pos,20.00,40.0,-75.0,40.100,-75.0
-UAT-R7-09,R7,,0,,UAT-R7-09-09,2020-03-08 13:00:00,card_A,merchant_a,misc_pos,20.00,40.0,-75.0,40.100,-75.0
+UAT-R7-09,R7,"Duplicate timestamps: two 50.00 txns at the same second, target is 1st in trans_num order (48h spend 60.00)",1,false,UAT-R7-09-08,2020-03-08 13:00:00,card_A,merchant_a,misc_pos,50.00,40.0,-75.0,40.100,-75.0
+UAT-R7-09,R7,,0,,UAT-R7-09-09,2020-03-08 13:00:00,card_A,merchant_a,misc_pos,50.00,40.0,-75.0,40.100,-75.0
 UAT-R7-10,R7,,0,,UAT-R7-10-01,2020-03-01 12:00:00,card_A,merchant_a,misc_pos,10.00,40.0,-75.0,40.100,-75.0
 UAT-R7-10,R7,,0,,UAT-R7-10-02,2020-03-02 12:00:00,card_A,merchant_a,misc_pos,10.00,40.0,-75.0,40.100,-75.0
 UAT-R7-10,R7,,0,,UAT-R7-10-03,2020-03-03 12:00:00,card_A,merchant_a,misc_pos,10.00,40.0,-75.0,40.100,-75.0
@@ -209,5 +213,9 @@ UAT-R7-10,R7,,0,,UAT-R7-10-04,2020-03-04 12:00:00,card_A,merchant_a,misc_pos,10.
 UAT-R7-10,R7,,0,,UAT-R7-10-05,2020-03-05 12:00:00,card_A,merchant_a,misc_pos,10.00,40.0,-75.0,40.100,-75.0
 UAT-R7-10,R7,,0,,UAT-R7-10-06,2020-03-06 12:00:00,card_A,merchant_a,misc_pos,10.00,40.0,-75.0,40.100,-75.0
 UAT-R7-10,R7,,0,,UAT-R7-10-07,2020-03-07 12:00:00,card_A,merchant_a,misc_pos,10.00,40.0,-75.0,40.100,-75.0
-UAT-R7-10,R7,,0,,UAT-R7-10-08,2020-03-08 13:00:00,card_A,merchant_a,misc_pos,20.00,40.0,-75.0,40.100,-75.0
-UAT-R7-10,R7,"Duplicate timestamps: two 20.00 txns at the same second, target is 2nd in trans_num order (24h spend 40.00)",1,true,UAT-R7-10-09,2020-03-08 13:00:00,card_A,merchant_a,misc_pos,20.00,40.0,-75.0,40.100,-75.0
+UAT-R7-10,R7,,0,,UAT-R7-10-08,2020-03-08 13:00:00,card_A,merchant_a,misc_pos,50.00,40.0,-75.0,40.100,-75.0
+UAT-R7-10,R7,"Duplicate timestamps: two 50.00 txns at the same second, target is 2nd in trans_num order (48h spend 110.00)",1,true,UAT-R7-10-09,2020-03-08 13:00:00,card_A,merchant_a,misc_pos,50.00,40.0,-75.0,40.100,-75.0
+UAT-R8-01,R8,"Merchant on list v1, tier very_high",1,true,UAT-R8-01-01,2020-03-02 12:00:00,card_A,fraud_Kozey-Boehm,misc_pos,20.00,40.0,-75.0,40.100,-75.0
+UAT-R8-02,R8,"Merchant on list v1, tier high",1,true,UAT-R8-02-01,2020-03-02 12:00:00,card_A,fraud_Kerluke-Abshire,misc_pos,20.00,40.0,-75.0,40.100,-75.0
+UAT-R8-03,R8,Merchant not on the list,1,false,UAT-R8-03-01,2020-03-02 12:00:00,card_A,merchant_a,misc_pos,20.00,40.0,-75.0,40.100,-75.0
+UAT-R8-04,R8,Listed name in different letter case: exact match only (documented gap),1,false,UAT-R8-04-01,2020-03-02 12:00:00,card_A,fraud_kozey-boehm,misc_pos,20.00,40.0,-75.0,40.100,-75.0

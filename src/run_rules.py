@@ -5,9 +5,13 @@ Usage: .venv\\Scripts\\python.exe src/run_rules.py --period train|test
 
 import argparse
 
-from db import OUTPUT_DIR, SQL_DIR, connect, has_statements, load_period, run_named_queries, run_sql_file
+from db import (
+    OUTPUT_DIR, RISK_LIST_CSV, SQL_DIR, connect, has_statements, load_period, run_named_queries, run_sql_file,
+)
 
 FLAGS_SQL = SQL_DIR / "10_features_and_flags.sql"
+# R8's list is built from train labels, so R8 is only ever scored on test.
+TEST_ONLY_FLAGS_SQL = SQL_DIR / "15_r8_risk_list.sql"
 RESULT_SQL_FILES = [SQL_DIR / "20_rule_performance.sql", SQL_DIR / "30_metrics.sql"]
 # Threshold sweeps are only ever run on train, so nothing is tuned on test.
 TRAIN_ONLY_SQL_FILES = [SQL_DIR / "40_sweeps_train.sql"]
@@ -44,6 +48,10 @@ def main():
     run_sql_file(con, FLAGS_SQL)
 
     out_dir = OUTPUT_DIR / args.period
+    if args.period == "test":
+        run_named_queries(con, TEST_ONLY_FLAGS_SQL, out_dir, {"risk_list_csv": RISK_LIST_CSV.as_posix()})
+        print(f"{TEST_ONLY_FLAGS_SQL.name}: R8 added from {RISK_LIST_CSV.name}")
+
     sql_files = RESULT_SQL_FILES + (TRAIN_ONLY_SQL_FILES if args.period == "train" else [])
     for sql_path in sql_files:
         if not is_written(sql_path):
