@@ -156,5 +156,6 @@ Evidence:
 
 | Role | Name | Date | Decision |
 |---|---|---|---|
-| Maker (rule author) | [TBD] | [TBD] | |
-| Checker (reviewer) | [TBD] | [TBD] | |
+| Maker (rule author) | Project author | 2026-11-17 | Rule sets v1 and v2 |
+| Checker (reviewer) | Self-reviewed (before the review process) | 2026-11-17 | Rule sets v1 and v2 |
+| Checker for v2.1 | Self-review against the PR checklist, with required CI checks; solo project | 2026-11-17 | v2.1 is a status change only (R6 to shadow). No logic changed, so no UAT case changed; 50 of 50 pass. |

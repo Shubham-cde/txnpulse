@@ -15,7 +15,7 @@ VALUES
     ('r3_late_night_high_value',    '2.0', 'active',  'HOLD_CONFIRM'),
     ('r4_risky_category_amount',    '2.0', 'active',  'ALERT'),
     ('r5_distance_anomaly',         '1.0', 'retired', 'ALERT'),
-    ('r6_new_merchant_high_amount', '2.0', 'active',  'STEP_UP'),
+    ('r6_new_merchant_high_amount', '2.0', 'shadow',  'STEP_UP'),
     ('r7_spend_burst',              '2.0', 'active',  'HOLD_CONFIRM'),
     ('r8_risk_list_hit',            '1.0', 'shadow',  'BLOCK / HOLD_CONFIRM by tier');
 

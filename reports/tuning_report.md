@@ -66,7 +66,7 @@ For scale (derived from the figures above):
   - This is treated as seasonality. It is planned for with peak staffing (about 1.5 analysts
     for December on alerts, or one analyst working cases), not by raising thresholds.
 
-![Monthly alerts on train](figures/tuning_monthly_alerts_train.png)
+![Monthly alerts on train](figures/tuning_monthly_alerts_train_v2.png)
 
 ## 3. Per-rule tuning
 Each sweep scores every combination in its grid on train. The v1 setting is always part of

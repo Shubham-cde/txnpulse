@@ -250,7 +250,7 @@ def pvt_rule_comparison():
                 handles.append(h)
                 labels.append(l)
     fig.legend(handles, labels, loc="upper right", ncol=3)
-    fig.suptitle("Frozen v2 rules: train vs test", x=0.01, ha="left", color=TEXT, fontsize=12)
+    fig.suptitle("Active rule set: train vs test", x=0.01, ha="left", color=TEXT, fontsize=12)
     fig.tight_layout(rect=(0, 0, 1, 0.9))
     save(fig, "pvt_train_vs_test.png")
 
@@ -260,10 +260,10 @@ def main():
     r4_by_category()
     r5_precision()
     candidate_sets()
-    monthly_budget("train", "v2 active rule set on train: alerts and cases per day by month", "tuning_monthly_alerts_train.png")
+    monthly_budget("train", "Active rule set on train: alerts and cases per day by month", "tuning_monthly_alerts_train.png")
     if (OUTPUT_DIR / "pvt" / "pvt_rule_comparison.csv").exists():
         pvt_rule_comparison()
-        monthly_budget("test", "Frozen v2 on test: alerts and cases per day by month", "pvt_monthly_alerts_test.png")
+        monthly_budget("test", "Active rule set on test: alerts and cases per day by month", "pvt_monthly_alerts_test.png")
 
 
 if __name__ == "__main__":

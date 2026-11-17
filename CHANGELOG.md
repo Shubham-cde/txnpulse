@@ -9,6 +9,50 @@ Versioning:
   the rule version. For example, R1, R2 and R5 kept their versions when they were retired
   in set v2.
 
+## 2026-11-17: rule set v2.1 (R6 to shadow)
+
+The first change through the pull request process. The PR description is kept with the
+project notes.
+
+### Rules
+- **R6:** status active to shadow. Logic unchanged at version 2.0. All other rules are
+  unchanged.
+- **Reason:** PVT on v2 showed R6 set the first response for 0 of 215 detected cards and
+  lost 0 fraud if removed. That meets the pre-agreed shadow rule. Its train figures were
+  partly a warm-up artifact (9.54% recall in the last 3 months of train, against 18.40%
+  overall).
+
+### Impact
+| | v2 | v2.1 |
+|---|---|---|
+| Train: alerts per day | 37.80 | 37.36 |
+| Train: cases per day | 17.21 | 16.79 |
+| Train: precision | 31.40% | 31.77% |
+| Train: recall | 84.92% | 84.92% |
+| Train: value detection | 98.04% | 98.04% |
+| Test (impact estimate, not out-of-sample validation): alerts per day | 41.20 | 41.02 |
+| Test: cases per day | 18.78 | 18.63 |
+| Test: precision | 22.21% | 22.30% |
+| Test: recall | 82.75% | 82.75% |
+| Test: value detection | 97.41% | 97.41% |
+
+- **Customer-facing STEP_UP actions go to 0.** 699 train alerts (38 on test) that R4 also
+  raises become post-event ALERT reviews. That includes 52 train frauds ($47,138.14) and
+  1 test fraud ($850.57).
+- **Rollback was tested:** with R6 set back to active, the active set returned to 20,300
+  train alerts and 7,992 test alerts.
+
+### Approvals
+- Rule set v2.1 checker: self-review against the PR checklist, with required CI checks;
+  solo project.
+- Rule sets v1 and v2: self-reviewed (before the review process).
+
+### Reports
+- The v2 PVT evidence is kept fixed: `reports/pvt_evidence/pvt_rule_comparison_v2.csv`,
+  `reports/figures/pvt_*_v2.png` and `reports/figures/tuning_monthly_alerts_train_v2.png`.
+- The unsuffixed charts are redrawn by `run_all.py` for the current rule set. Their titles
+  no longer name a version.
+
 ## 2026-11-17: documentation and governance (rule set unchanged, still v2)
 
 ### Governance
